@@ -1,0 +1,42 @@
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Architectural Decision Records (ADRs) consist of 4 key areas
+        1. Context: Add context about the problem you're facing
+        2. Decision: The solution you decided to go with to solve the problem
+        3. Alternatives: Any other ways you thought you could solve the problem
+        4. Consequences: Any issues that may arise in the future due to commiting to this decision
+        __Note__: Consequences don't have to be a bad thing, its just leaving a clue to your future self of what may happen so you can prepare for it. Example: If we get 1 million more users, this will stop working. That is complete a acceptable 
+        risk profile to take when you have a total of 3 users. 
+
+        
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: "What Problem Are you facing?"
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision
+      description: "A description of the decision you made to solve the problem?"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: "Did you any consider any alternatives?"
+    validations:
+      required: false
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Consequences
+      description: "What limitations may this cause or when will this need to be revisted?"
+    validations:
+      required: true
