@@ -20,21 +20,17 @@ func (service *Service) Validate() error {
 	switch {
 	case service.Name == "":
 		return errors.New("service name is required")
-	case service.Url == "":
-		return errors.New("service url is required")
 	case service.ServiceType == "":
 		return errors.New("service type is required")
 	}
+	//allow url to be optional but validate if passed in
+	if service.Url != "" {
+		// Validate URL format
+		_, err := url.Parse(service.Url)
+		if err != nil {
+			return errors.New("service url is not a valid URL format")
+		}
 
-	// Validate URL format
-	parsedURL, err := url.Parse(service.Url)
-	if err != nil {
-		return errors.New("service url is not a valid URL format")
-	}
-
-	// Ensure URL has a scheme (http or https)
-	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
-		return errors.New("service url must use http or https protocol")
 	}
 
 	return nil

@@ -36,8 +36,7 @@ func TestValidate(t *testing.T) {
 				ServiceType: "API",
 				Description: "A test service",
 			},
-			expectError: true,
-			errorMsg:    "service url is required",
+			expectError: false,
 		},
 		{
 			name: "Missing service type",
@@ -61,17 +60,6 @@ func TestValidate(t *testing.T) {
 			errorMsg:    "service url is not a valid URL format",
 		},
 		{
-			name: "URL without scheme",
-			service: Service{
-				Name:        "TestService",
-				ServiceType: "API",
-				Description: "A test service",
-				Url:         "invalid-url",
-			},
-			expectError: true,
-			errorMsg:    "service url must use http or https protocol",
-		},
-		{
 			name: "URL without http/https scheme",
 			service: Service{
 				Name:        "TestService",
@@ -79,8 +67,7 @@ func TestValidate(t *testing.T) {
 				Description: "A test service",
 				Url:         "ftp://test-service.com",
 			},
-			expectError: true,
-			errorMsg:    "service url must use http or https protocol",
+			expectError: false,
 		},
 	}
 
