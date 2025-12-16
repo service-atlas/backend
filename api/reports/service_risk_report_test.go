@@ -54,6 +54,10 @@ func TestGetServiceRiskReportSuccess(t *testing.T) {
 		t.Fatalf("Failed to decode response body: %v", err)
 	}
 
+	if contentType := rw.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Expected Content-Type %s, got %s", "application/json", contentType)
+	}
+
 	// Check that the correct report was returned
 	if report.DependentCount != mockReport.DependentCount {
 		t.Errorf("Expected DependentCount %d, got %d", mockReport.DependentCount, report.DependentCount)
