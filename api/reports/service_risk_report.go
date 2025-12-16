@@ -22,9 +22,10 @@ func (c *CallsHandler) GetServiceRiskReport(rw http.ResponseWriter, req *http.Re
 		customerrors.HandleError(rw, err)
 		return
 	}
+	rw.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(rw).Encode(report)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
-	rw.Header().Set("Content-Type", "application/json")
+
 }
