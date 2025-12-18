@@ -1,9 +1,9 @@
-name: build-test
-run-name: Build and Test by @${{github.actor}}
+name: weekly-test
+run-name: Weekly Full Test
 
 on:
   schedule:
-    - cron: '0 16 * * THU'
+    - cron: '0 1 * * MON'
   workflow_dispatch:
 
 env:
