@@ -2,14 +2,11 @@ name: build-test
 run-name: Build and Test by @${{github.actor}}
 
 on:
-  pull_request:
-    types:
-      - synchronize
-      - ready_for_review
-      - reopened
-      - opened
+  schedule:
+    - cron: '0 16 * * THU'
+  workflow_dispatch:
+
 env:
-  HEAD_REF: ${{ github.head_ref }}
   GO_VERSION: 1.25.3
 jobs:
   build:
@@ -42,8 +39,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: Checkout
-        with:
-          ref: ${{ github.head_ref }}
 
       - uses: actions/setup-go@v5.5.0
         with:
@@ -52,5 +47,26 @@ jobs:
       - name: run tests
         shell: bash
         run: |
-          go test --short -v ./... -covermode=count -coverprofile=coverage.out
+          go test -v ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
+
+      - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
+        uses: tj-actions/coverage-badge-go@v2
+        with:
+          filename: coverage.out
+
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v17
+        id: verify-changed-files
+        with:
+          files: README.md
+
+      - name: Commit changes
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git commit -m "chore: Updated coverage badge." || echo "No changes to commit"
+          git push origin ${{ env.HEAD_REF }}
+
