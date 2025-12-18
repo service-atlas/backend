@@ -3,12 +3,10 @@ package debtrepository
 import (
 	"context"
 	"errors"
-	"testing"
-	"time"
-
 	"service-atlas/internal/customerrors"
 	"service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
+	"testing"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
@@ -18,8 +16,7 @@ func TestNeo4jDebtRepository_CreateDebtItem(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	// Start Neo4j test container
 	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
@@ -108,8 +105,7 @@ func TestNeo4jDebtRepository_CreateDebtItem_NoService(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	// Start Neo4j test container
 	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)

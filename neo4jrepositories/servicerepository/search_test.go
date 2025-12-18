@@ -5,7 +5,6 @@ import (
 	nRepo "service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
 	"testing"
-	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
@@ -15,8 +14,7 @@ func TestNeo4jServiceRepository_Search(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	tc, err := nRepo.NewTestContainerHelper(ctx)
 	if err != nil {

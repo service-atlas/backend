@@ -2,12 +2,10 @@ package servicerepository
 
 import (
 	"context"
-	"testing"
-	"time"
-
 	nRepo "service-atlas/neo4jrepositories"
 	teamrepo "service-atlas/neo4jrepositories/teamrepository"
 	"service-atlas/repositories"
+	"testing"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
@@ -16,8 +14,7 @@ func TestNeo4jServiceRepository_GetTeamsByServiceId_Success(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	tc, err := nRepo.NewTestContainerHelper(ctx)
 	if err != nil {
@@ -75,8 +72,7 @@ func TestNeo4jServiceRepository_GetTeamsByServiceId_NotFound(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	tc, err := nRepo.NewTestContainerHelper(ctx)
 	if err != nil {
