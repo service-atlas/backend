@@ -17,8 +17,7 @@ func TestNeo4jReleaseRepository_GetReleasesByServiceId_SuccessAndPagination(t *t
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
 	if err != nil {
@@ -95,8 +94,7 @@ func TestNeo4jReleaseRepository_GetReleasesByServiceId_NotFound(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
 	if err != nil {

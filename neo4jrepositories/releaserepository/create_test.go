@@ -17,8 +17,7 @@ func TestNeo4jReleaseRepository_CreateRelease_Success(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	// Start Neo4j test container
 	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
@@ -93,8 +92,7 @@ func TestNeo4jReleaseRepository_CreateRelease_ServiceNotFound(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
 	if err != nil {

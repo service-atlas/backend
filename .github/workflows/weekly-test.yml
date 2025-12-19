@@ -37,8 +37,17 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.COVERAGE_APP_ID }}
+          private_key: ${{ secrets.COVERAGE_SECRET }}
+
       - uses: actions/checkout@v4
         name: Checkout
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - uses: actions/setup-go@v5.5.0
         with:
@@ -64,9 +73,10 @@ jobs:
       - name: Commit changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add README.md
           git commit -m "chore: Updated coverage badge." || echo "No changes to commit"
-          git push origin main
+          git pull --rebase origin main
+          git push https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git HEAD:main
 
