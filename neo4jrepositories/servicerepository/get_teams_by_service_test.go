@@ -2,6 +2,8 @@ package servicerepository
 
 import (
 	"context"
+	"errors"
+	"service-atlas/internal/customerrors"
 	nRepo "service-atlas/neo4jrepositories"
 	teamrepo "service-atlas/neo4jrepositories/teamrepository"
 	"service-atlas/repositories"
@@ -89,11 +91,16 @@ func TestNeo4jServiceRepository_GetTeamsByServiceId_NotFound(t *testing.T) {
 	svcRepo := New(driver)
 
 	// Act: use a random/non-existent id
-	teams, err := svcRepo.GetTeamsByServiceId(ctx, "00000000-0000-0000-0000-000000000000")
-	if err != nil {
+	_, err = svcRepo.GetTeamsByServiceId(ctx, "00000000-0000-0000-0000-000000000000")
+	if err == nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	if len(teams) != 0 {
-		t.Fatalf("expected 0 teams, got %d", len(teams))
+	cErr := &customerrors.HTTPError{}
+	if errors.As(err, cErr) {
+		if cErr.Status != 404 {
+			t.Fatalf("expected HTTP 404, got %d", cErr.Status)
+		}
+	} else {
+		t.Fatalf("expected *customerrors.HTTPError, got %T: %v", err, err)
 	}
 }
