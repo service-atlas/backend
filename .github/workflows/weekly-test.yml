@@ -73,6 +73,8 @@ jobs:
       - name: Commit changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add README.md
           git commit -m "chore: Updated coverage badge." || echo "No changes to commit"
           git push https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git HEAD:main
