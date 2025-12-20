@@ -1,0 +1,111 @@
+meta {
+  name: Get Services By Tier
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/reports/services/tier?tier=3
+  body: none
+  auth: inherit
+}
+
+params:query {
+  tier: 3
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+docs {
+  # Service by Tier Report
+  
+  Returns the list of services that are on the provided criticality tier
+  
+  ## Parameters
+  | Paremter | Type | Notes |
+  | -------- | ---- | ----- |
+  | tier | Query | Has to be in 1-4| 
+  
+  ## Status Codes
+  | Status Code | Description |
+  |-------------|-------------|
+  | 200 OK      | Success. |
+  | 400 Bad Request | Tier query param is outside 1-4 or not provided | 
+  | 500 Internal Server Error | Failed to create debt due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/reports/services/tier?tier=3
+    method: GET
+    mode: none
+    params:query: {
+      tier: 3
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Sat, 20 Dec 2025 02:50:29 GMT
+      content-length: 415
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": "f790a94c-33e4-4ac1-a0f3-8f9280c88453",
+            "name": "Customer Database",
+            "type": "database",
+            "description": "customer database",
+            "created": "2025-12-20T02:27:13.538Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "url": "https://flimsy-amendment.net",
+            "tier": 3
+          },
+          {
+            "id": "20f6699c-471e-4ea6-8fe8-bb176b74ca5b",
+            "name": "Warehouse API",
+            "type": "service",
+            "description": "warehouse api",
+            "created": "2025-12-20T02:27:13.703Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "url": "https://immediate-possession.org/",
+            "tier": 3
+          },
+          {
+            "id": "0dff6869-7319-4910-b01b-2d2c02f3550d",
+            "name": "Warehouse Event Bus",
+            "type": "event_bus",
+            "description": "warehouse bus to stream item quantities",
+            "created": "2025-12-20T02:27:13.733Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "tier": 3
+          },
+          {
+            "id": "140b221d-d49c-4b19-9784-44b2ba35edc3",
+            "name": "Cart Cache",
+            "type": "cache",
+            "description": "cart memcache",
+            "created": "2025-12-20T02:27:14.009Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "tier": 3
+          }
+        ]
+      '''
+    }
+  }
+}
