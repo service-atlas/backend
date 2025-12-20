@@ -17,3 +17,9 @@ type ServiceChangeRisk struct {
 	Risk  string `json:"risk"`
 	Score int    `json:"score,omitempty"`
 }
+
+// ComprehensiveServiceRisk represents the risk score for a service, including health and change risk.
+type ComprehensiveServiceRisk struct {
+	ChangeRisk *ServiceChangeRisk `json:"changeRisk"`
+	HealthRisk *ServiceRiskReport `json:"healthRisk"`
+}
