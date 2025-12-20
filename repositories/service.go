@@ -37,7 +37,7 @@ func (service *Service) Validate() error {
 		service.Tier = 3
 	}
 	if service.Tier < 0 || service.Tier > 4 {
-		return errors.New("criticality must be between 0 and 4")
+		return errors.New("tier must be between 0 and 4")
 	}
 
 	return nil

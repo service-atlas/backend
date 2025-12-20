@@ -89,7 +89,7 @@ func TestValidate(t *testing.T) {
 				Tier:        -1,
 			},
 			expectError: true,
-			errorMsg:    "criticality must be between 0 and 4",
+			errorMsg:    "tier must be between 0 and 4",
 		},
 		{
 			name: "Tier greater than 4",
@@ -101,7 +101,7 @@ func TestValidate(t *testing.T) {
 				Tier:        5,
 			},
 			expectError: true,
-			errorMsg:    "criticality must be between 0 and 4",
+			errorMsg:    "tier must be between 0 and 4",
 		},
 	}
 
