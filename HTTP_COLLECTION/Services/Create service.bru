@@ -24,17 +24,25 @@ docs {
   
   This call allows you to create a new service.
   
-  ## Sample Body
+  #### Sample Body
   ```json
   {
     "name": "NewService",
     "type": "service",
     "description": "Description of the new service",
     "url": "http://new-service.com",
-    "tier": 1
+    "tier": 2
   }
   ```
-  Note that "tier" is optional and will default to `3`. Url is also an optional field, but will be validated if a non-empty string is passed in.
+  
+  Tier represents service criticality. Valid values are integers 1–4 (not 0–4):
+  - 1 = Mission Critical
+  - 2 = Business Critical
+  - 3 = Supporting
+  - 4 = Non-Critical/Auxiliary
+  
+  The `tier` field is optional; if omitted, the service defaults to `3`. Passing `0` is not valid and will fail validation. URL is also optional but will be validated if a non-empty string is provided.
+  
   
   ## Status Codes
   | Status Code | Description |
