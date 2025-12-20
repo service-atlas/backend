@@ -76,7 +76,9 @@ func TestNeo4jServiceRepository_CreateService_Success(t *testing.T) {
 	if created, _ := rec.Get("created"); created == nil {
 		t.Fatalf("expected non-nil created, got %#v", created)
 	}
-	if crit, _ := rec.Get("criticality"); crit != input.Criticality {
-		t.Fatalf("expected criticality %d, got %d", input.Criticality, crit)
+	if crit, ok := rec.Get("criticality"); ok {
+		if int(crit.(int64)) != input.Criticality {
+			t.Fatalf("expected criticality %d, got %d", input.Criticality, crit)
+		}
 	}
 }
