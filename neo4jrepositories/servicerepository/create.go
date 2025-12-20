@@ -2,8 +2,9 @@ package servicerepository
 
 import (
 	"context"
-	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"service-atlas/repositories"
+
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 func (d *Neo4jServiceRepository) CreateService(ctx context.Context, service repositories.Service) (id string, err error) {
@@ -17,6 +18,7 @@ func (d *Neo4jServiceRepository) CreateService(ctx context.Context, service repo
 				"type":        service.ServiceType,
 				"description": service.Description,
 				"url":         service.Url,
+				"criticality": service.Criticality,
 			})
 		if err != nil {
 			return "", err
