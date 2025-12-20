@@ -35,7 +35,7 @@ func TestNeo4jServiceRepository_GetServiceById_Success(t *testing.T) {
 		Description: "desc",
 		ServiceType: "worker",
 		Url:         "https://svc-get",
-		Criticality: 1,
+		Tier:        1,
 	})
 	if err != nil {
 		t.Fatalf("CreateService error: %v", err)
@@ -51,7 +51,7 @@ func TestNeo4jServiceRepository_GetServiceById_Success(t *testing.T) {
 	if svc.Id != createdID {
 		t.Fatalf("expected id %s, got %s", createdID, svc.Id)
 	}
-	if svc.Name != "svc-get" || svc.Description != "desc" || svc.ServiceType != "worker" || svc.Url != "https://svc-get" || svc.Criticality != 1 {
+	if svc.Name != "svc-get" || svc.Description != "desc" || svc.ServiceType != "worker" || svc.Url != "https://svc-get" || svc.Tier != 1 {
 		t.Fatalf("fields not mapped correctly: %+v", svc)
 	}
 }

@@ -11,14 +11,14 @@ func (d *Neo4jServiceRepository) CreateService(ctx context.Context, service repo
 	createServiceTransaction := func(tx neo4j.ManagedTransaction) (any, error) {
 		result, err := tx.Run(
 			ctx, `
-        CREATE (n: Service {id: randomuuid(), created: datetime(), name: $name, type: $type, description: $description, url: $url, criticality: $criticality})
+        CREATE (n: Service {id: randomuuid(), created: datetime(), name: $name, type: $type, description: $description, url: $url, tier: $tier})
         RETURN n.id AS id
         `, map[string]any{
 				"name":        service.Name,
 				"type":        service.ServiceType,
 				"description": service.Description,
 				"url":         service.Url,
-				"criticality": service.Criticality,
+				"tier":        service.Tier,
 			})
 		if err != nil {
 			return "", err
