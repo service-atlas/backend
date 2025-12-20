@@ -28,12 +28,14 @@ func (r Neo4jReportRepository) GetServicesByTier(ctx context.Context, tier int) 
 			record := result.Record()
 			node, ok := record.Get("s")
 			if !ok {
+				logger.Warn("Failed to extract node from query result", "record", record)
 				continue
 			}
 
 			n, ok := node.(neo4j.Node)
 			if !ok {
 				logger.Warn("Failed to convert node to Service", "node", node)
+				continue
 			}
 
 			svc := nRepo.MapNodeToService(n)
