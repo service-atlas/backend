@@ -70,7 +70,7 @@ func TestValidate(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name: "Unset Criticality",
+			name: "Unset Tier",
 			service: Service{
 				Name:        "TestService",
 				ServiceType: "API",
@@ -80,25 +80,25 @@ func TestValidate(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name: "Criticality less than 0",
+			name: "Tier less than 0",
 			service: Service{
 				Name:        "TestService",
 				ServiceType: "API",
 				Description: "A test service",
 				Url:         "https://test-service.com",
-				Criticality: -1,
+				Tier:        -1,
 			},
 			expectError: true,
 			errorMsg:    "criticality must be between 0 and 4",
 		},
 		{
-			name: "Criticality greater than 4",
+			name: "Tier greater than 4",
 			service: Service{
 				Name:        "TestService",
 				ServiceType: "API",
 				Description: "A test service",
 				Url:         "https://test-service.com",
-				Criticality: 5,
+				Tier:        5,
 			},
 			expectError: true,
 			errorMsg:    "criticality must be between 0 and 4",
@@ -107,7 +107,7 @@ func TestValidate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			criticalityUnset := tt.service.Criticality == 0
+			criticalityUnset := tt.service.Tier == 0
 			err := tt.service.Validate()
 
 			if tt.expectError {
@@ -122,8 +122,8 @@ func TestValidate(t *testing.T) {
 				if err != nil {
 					t.Errorf("Expected no error but got: %v", err)
 				}
-				if criticalityUnset && tt.service.Criticality != 3 {
-					t.Errorf("Expected criticality to be set to 3(default), got %d", tt.service.Criticality)
+				if criticalityUnset && tt.service.Tier != 3 {
+					t.Errorf("Expected criticality to be set to 3(default), got %d", tt.service.Tier)
 				}
 			}
 		})

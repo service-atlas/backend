@@ -14,7 +14,7 @@ type Service struct {
 	Created     time.Time `json:"created"`
 	Updated     time.Time `json:"updated,omitempty"`
 	Url         string    `json:"url,omitempty"`
-	Criticality int       `json:"criticality"`
+	Tier        int       `json:"tier"`
 }
 
 func (service *Service) Validate() error {
@@ -33,10 +33,10 @@ func (service *Service) Validate() error {
 		}
 
 	}
-	if service.Criticality == 0 {
-		service.Criticality = 3
+	if service.Tier == 0 {
+		service.Tier = 3
 	}
-	if service.Criticality < 0 || service.Criticality > 4 {
+	if service.Tier < 0 || service.Tier > 4 {
 		return errors.New("criticality must be between 0 and 4")
 	}
 
