@@ -148,6 +148,27 @@ func Test_mapNodeToService(t *testing.T) {
 			wantCriticality: 1,
 		},
 		{
+			name: "criticality is mapped properly",
+			node: neo4j.Node{Props: map[string]any{
+				"name":        "svc-a",
+				"description": "a test service",
+				"type":        "api",
+				"id":          "svc-123",
+				"url":         "https://example.com",
+				"created":     now,
+				"updated":     later,
+				"criticality": int64(4),
+			}},
+			wantName:        "svc-a",
+			wantDescription: "a test service",
+			wantType:        "api",
+			wantId:          "svc-123",
+			wantUrl:         "https://example.com",
+			wantCreated:     now,
+			wantUpdated:     later,
+			wantCriticality: 4,
+		},
+		{
 			name: "missing optional properties are zero-valued",
 			node: neo4j.Node{Props: map[string]any{
 				"name": "only-name",
@@ -240,6 +261,9 @@ func Test_mapNodeToService(t *testing.T) {
 				}
 			} else if !got.Updated.Equal(tt.wantUpdated) {
 				t.Errorf("Updated: expected %v, got %v", tt.wantUpdated, got.Updated)
+			}
+			if tt.wantCriticality != got.Criticality {
+				t.Errorf("Criticality: expected %d, got %d", tt.wantCriticality, got.Criticality)
 			}
 		})
 	}

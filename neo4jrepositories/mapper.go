@@ -46,8 +46,10 @@ func MapNodeToService(n neo4j.Node) repositories.Service {
 	}
 
 	if crit, ok := n.Props["criticality"]; ok {
-		if critStr, ok := crit.(int); ok {
-			svc.Criticality = critStr
+		if critInt64, ok := crit.(int64); ok {
+			svc.Criticality = int(critInt64)
+		} else if critInt, ok := crit.(int); ok {
+			svc.Criticality = critInt
 		}
 	}
 
