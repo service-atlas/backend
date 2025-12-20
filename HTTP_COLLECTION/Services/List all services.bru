@@ -15,6 +15,10 @@ params:query {
   pageSize: 3
 }
 
+assert {
+  res.body: isArray
+}
+
 docs {
   # Get All Sevices
   This call gets a paginated list of all service objects (which can include databases or any other custom types that have been inserted).

@@ -11,7 +11,13 @@ get {
 }
 
 params:path {
-  id: 0fccc072-587a-46de-85d1-d8437f1d2f65
+  id: b3ea996f-ad6f-4e34-baf8-1dc38b602f89
+}
+
+assert {
+  res.body.tier: isNumber
+  res.body.id: isNotEmpty
+  res.body.name: isNotEmpty
 }
 
 docs {
