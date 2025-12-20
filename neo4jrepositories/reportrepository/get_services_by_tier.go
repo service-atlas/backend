@@ -2,6 +2,7 @@ package reportrepository
 
 import (
 	"context"
+	"service-atlas/internal"
 	nRepo "service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
 
@@ -10,6 +11,8 @@ import (
 
 func (r Neo4jReportRepository) GetServicesByTier(ctx context.Context, tier int) ([]repositories.Service, error) {
 	services := make([]repositories.Service, 0)
+	logger := internal.LoggerFromContext(ctx)
+	logger.Info("Getting services by tier", "tier", tier)
 	work := func(tx neo4j.ManagedTransaction) (any, error) {
 		result, err := tx.Run(ctx, `
 			MATCH (s:Service)
@@ -30,11 +33,14 @@ func (r Neo4jReportRepository) GetServicesByTier(ctx context.Context, tier int) 
 
 			n, ok := node.(neo4j.Node)
 			if !ok {
-				continue
+				logger.Warn("Failed to convert node to Service", "node", node)
 			}
 
 			svc := nRepo.MapNodeToService(n)
 			services = append(services, svc)
+		}
+		if err := result.Err(); err != nil {
+			return nil, err
 		}
 		return nil, nil
 	}
