@@ -45,6 +45,12 @@ func MapNodeToService(n neo4j.Node) repositories.Service {
 		}
 	}
 
+	if crit, ok := n.Props["criticality"]; ok {
+		if critStr, ok := crit.(int); ok {
+			svc.Criticality = critStr
+		}
+	}
+
 	// Safely extract created date with validation
 	if date, ok := n.Props["created"]; ok {
 		if dateStr, ok := date.(time.Time); ok {

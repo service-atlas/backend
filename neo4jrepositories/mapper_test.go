@@ -122,6 +122,7 @@ func Test_mapNodeToService(t *testing.T) {
 		wantType        string
 		wantId          string
 		wantUrl         string
+		wantCriticality int
 		wantCreated     time.Time
 		wantUpdated     time.Time
 	}{
@@ -135,6 +136,7 @@ func Test_mapNodeToService(t *testing.T) {
 				"url":         "https://example.com",
 				"created":     now,
 				"updated":     later,
+				"criticality": 1,
 			}},
 			wantName:        "svc-a",
 			wantDescription: "a test service",
@@ -143,6 +145,7 @@ func Test_mapNodeToService(t *testing.T) {
 			wantUrl:         "https://example.com",
 			wantCreated:     now,
 			wantUpdated:     later,
+			wantCriticality: 1,
 		},
 		{
 			name: "missing optional properties are zero-valued",
@@ -156,6 +159,7 @@ func Test_mapNodeToService(t *testing.T) {
 			wantUrl:         "",
 			wantCreated:     time.Time{},
 			wantUpdated:     time.Time{},
+			wantCriticality: 0,
 		},
 		{
 			name: "incorrect types are ignored (leave zero values)",
@@ -167,6 +171,7 @@ func Test_mapNodeToService(t *testing.T) {
 				"url":         struct{}{},     // not a string
 				"created":     "yesterday",    // not time.Time
 				"updated":     3.14,           // not time.Time
+				"criticality": "high",         // not int
 			}},
 			wantName:        "",
 			wantDescription: "",
@@ -175,6 +180,7 @@ func Test_mapNodeToService(t *testing.T) {
 			wantUrl:         "",
 			wantCreated:     time.Time{},
 			wantUpdated:     time.Time{},
+			wantCriticality: 0,
 		},
 		{
 			name: "extra properties are ignored",
@@ -184,6 +190,7 @@ func Test_mapNodeToService(t *testing.T) {
 				"type":        "worker",
 				"id":          "svc-456",
 				"url":         "http://localhost",
+				"criticality": 2,
 				"created":     now,
 				"updated":     later,
 				"foo":         "bar",
@@ -193,6 +200,7 @@ func Test_mapNodeToService(t *testing.T) {
 			wantType:        "worker",
 			wantId:          "svc-456",
 			wantUrl:         "http://localhost",
+			wantCriticality: 2,
 			wantCreated:     now,
 			wantUpdated:     later,
 		},
