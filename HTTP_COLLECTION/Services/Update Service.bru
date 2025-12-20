@@ -11,16 +11,17 @@ put {
 }
 
 params:path {
-  id: {{serviceId}}
+  id: 0fccc072-587a-46de-85d1-d8437f1d2f65
 }
 
 body:json {
   {
-    "id": "{{serviceId}}",
+    "id": "0fccc072-587a-46de-85d1-d8437f1d2f65",
     "name": "Newark3",
     "type": "service",
     "description": "this is a test form bruno",
-    "url": "{{$randomUrl}}"
+    "url": "{{$randomUrl}}",
+    "tier": 2
   }
 }
 
@@ -33,6 +34,7 @@ docs {
   - description
   - type
   - url
+  - tier
   
   ### Sample Body
   
@@ -41,7 +43,8 @@ docs {
     "id": "5931d4b0-dd0a-4654-85fe-78f42890da0d",
     "name": "Newark3",
     "type": "service",
-    "description": "this is a test form bruno"
+    "description": "this is a test form bruno",
+    "tier": 2
   }
   ```
   

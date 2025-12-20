@@ -2,21 +2,23 @@ package servicerepository
 
 import (
 	"context"
-	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"service-atlas/repositories"
+
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 func (d *Neo4jServiceRepository) CreateService(ctx context.Context, service repositories.Service) (id string, err error) {
 	createServiceTransaction := func(tx neo4j.ManagedTransaction) (any, error) {
 		result, err := tx.Run(
 			ctx, `
-        CREATE (n: Service {id: randomuuid(), created: datetime(), name: $name, type: $type, description: $description, url: $url})
+        CREATE (n: Service {id: randomuuid(), created: datetime(), name: $name, type: $type, description: $description, url: $url, tier: $tier})
         RETURN n.id AS id
         `, map[string]any{
 				"name":        service.Name,
 				"type":        service.ServiceType,
 				"description": service.Description,
 				"url":         service.Url,
+				"tier":        service.Tier,
 			})
 		if err != nil {
 			return "", err

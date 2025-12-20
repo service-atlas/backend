@@ -37,6 +37,7 @@ func TestNeo4jServiceRepository_CreateService_Success(t *testing.T) {
 		Description: "created service",
 		ServiceType: "api",
 		Url:         "https://svc-create",
+		Tier:        1,
 	}
 	id, err := repo.CreateService(ctx, input)
 	if err != nil {
@@ -50,7 +51,7 @@ func TestNeo4jServiceRepository_CreateService_Success(t *testing.T) {
 	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer func() { _ = read.Close(ctx) }()
 	res, err := read.Run(ctx,
-		"MATCH (s:Service {id: $id}) RETURN s.name AS name, s.type AS type, s.description AS description, s.url AS url, s.created AS created",
+		"MATCH (s:Service {id: $id}) RETURN s.name AS name, s.type AS type, s.description AS description, s.url AS url, s.tier AS tier, s.created AS created",
 		map[string]any{"id": id},
 	)
 	if err != nil {
@@ -74,5 +75,10 @@ func TestNeo4jServiceRepository_CreateService_Success(t *testing.T) {
 	}
 	if created, _ := rec.Get("created"); created == nil {
 		t.Fatalf("expected non-nil created, got %#v", created)
+	}
+	if crit, ok := rec.Get("tier"); ok {
+		if int(crit.(int64)) != input.Tier {
+			t.Fatalf("expected tier %d, got %d", input.Tier, crit)
+		}
 	}
 }

@@ -26,6 +26,7 @@ This API allows you to:
     - GitHub repository
 - Associate releases with services
 - Ability to add technical debt to a service
+- Classify services by operational criticality using Service Tiers (1–4)
 
 ## What is a "Service"
 A service is any object that you wish to track as part of your catalog of objects. This can be databases, apis, servers, or anything else.
@@ -68,6 +69,8 @@ Services are created under a `Service` object, while releases are created under 
 Services can have a `Depend_ON` relationship that may have a version as part of the relationship
 Services `Released` a `Release`
 Services `OWNS` a `Debt`
+
+Services also include a `tier` property to indicate operational criticality, validated to be an integer from 1 (most critical) to 4 (least critical). If not set, it defaults to Tier 3 (Supporting) behavior.
 
 Releases will always have a date; releases without a date are assigned `now()` as the date. Releases may have an associated url, a version, or both, but require at least the url or a version to be present.
 
@@ -113,8 +116,45 @@ The server listens on port 8080 by default.
 For more information on endpoints, see the [Bruno Collection](./HTTP_COLLECTION) or the [OAS file](./_http_docs/v1.2.0.yaml)
 
 ## ChangeLog
+### V1.4.0
+_Date: 2025-12-19_
+- Introduces Service Tiers (criticality classification) with `tier` field on Service (allowed values 1–4)
+- Validates tier values and returns `tier` in API responses
+- Supports creating, updating, and querying services by `tier`
+- Defaults existing/unspecified services to Tier 3 behavior
+
 ### V1.2.0
 _Date: 2025-11-09_
 - Refactors to use Chi http routing library
 - Adds support for associating teams to services
 - Adds test container tests to neo4j repositories
+
+## Service Tiers (Criticality Classification)
+
+### Summary
+Service Tiers introduce a `tier` attribute on `Service` to represent how critical a component is to the overall operation of the platform. This helps reason about impact, prioritize work, and understand dependency risk across the system.
+
+### Tier Model
+Use 4 tiers, where Tier 1 is the most critical.
+
+- Tier 1 — Mission Critical
+  - Core to the platform’s primary purpose
+  - Outage results in total or near-total platform failure
+  - High customer, revenue, or availability impact
+- Tier 2 — Business Critical
+  - Platform remains partially functional if down
+  - Significant degradation of key features or workflows
+  - High user impact, but not a full outage
+- Tier 3 — Supporting
+  - Enhances or supports core functionality
+  - Failures are noticeable but tolerable short-term
+  - Often asynchronous or auxiliary services
+- Tier 4 — Non-Critical / Auxiliary
+  - Minimal operational impact if unavailable
+  - Internal tools, dashboards, or experimental components
+
+### Scope
+- New `tier` field on the Service model
+- Validation of allowed tier values (1–4)
+- Default behavior for existing services: if unset, treat as Tier 3
+- API support for creating, updating, and querying services by `tier`

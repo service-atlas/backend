@@ -5,20 +5,24 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/services?page=1&pageSize=10
+  url: {{baseUrl}}/services?page=1&pageSize=3
   body: none
   auth: none
 }
 
 params:query {
   page: 1
-  pageSize: 10
+  pageSize: 3
+}
+
+assert {
+  res.body: isArray
 }
 
 docs {
-  # Get All Sevices
+  # Get All Services
   This call gets a paginated list of all service objects (which can include databases or any other custom types that have been inserted).
-
+  
   
   ## Parameters
   | Parameter | Type | Description |
@@ -32,17 +36,7 @@ docs {
   ```
   
   ## Response Body
-  ```json
-  [
-    {
-      "id": "service_id",
-      "name": "Service Name",
-      "type": "service_type",
-      "description": "Description of the service",
-      "url": "http://service_url"
-    }
-  ]
-  ```
+  See `Sample Response` example associated with this call
   
   ## Status Codes
   | Status Code | Description |
@@ -50,4 +44,70 @@ docs {
   | 200 OK      | Services retrieved successfully. |
   | 400 Bad Request | Invalid page or pageSize parameter. |
   | 500 Internal Server Error | Failed to retrieve services due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  description: Example of a small page of data returned from the api
+  
+  request: {
+    url: {{baseUrl}}/services?page=1&pageSize=3
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      pageSize: 3
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Sat, 20 Dec 2025 02:03:25 GMT
+      content-length: 334
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": "c622461d-9a9b-4a84-b191-820a7de0eb25",
+            "name": "Authentication API",
+            "type": "service",
+            "description": "auth service",
+            "created": "2025-12-20T02:02:45.395Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "url": "https://coarse-lawmaker.com",
+            "tier": 1
+          },
+          {
+            "id": "effce7b5-009d-4c09-a283-1fad619fe71b",
+            "name": "Customer Database",
+            "type": "database",
+            "description": "customer database",
+            "created": "2025-12-20T02:02:46.08Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "url": "https://key-litter.com/",
+            "tier": 3
+          },
+          {
+            "id": "5ba1984b-7639-42f9-b8a7-965992c9069a",
+            "name": "Authentication Database",
+            "type": "database",
+            "description": "auth db",
+            "created": "2025-12-20T02:02:44.745Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "tier": 1
+          }
+        ]
+      '''
+    }
+  }
 }

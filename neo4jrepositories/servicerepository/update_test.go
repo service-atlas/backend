@@ -37,6 +37,7 @@ func TestNeo4jServiceRepository_UpdateService_Success(t *testing.T) {
 		Description: "before",
 		ServiceType: "api",
 		Url:         "https://before",
+		Tier:        1,
 	})
 	if err != nil {
 		t.Fatalf("CreateService error: %v", err)
@@ -49,6 +50,7 @@ func TestNeo4jServiceRepository_UpdateService_Success(t *testing.T) {
 		Description: "after",
 		ServiceType: "worker",
 		Url:         "https://after",
+		Tier:        2,
 	}
 	if err := repo.UpdateService(ctx, u); err != nil {
 		t.Fatalf("UpdateService returned error: %v", err)
@@ -58,7 +60,7 @@ func TestNeo4jServiceRepository_UpdateService_Success(t *testing.T) {
 	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer func() { _ = read.Close(ctx) }()
 	res, err := read.Run(ctx,
-		"MATCH (s:Service {id: $id}) RETURN s.name AS name, s.type AS type, s.description AS description, s.url AS url, s.updated AS updated",
+		"MATCH (s:Service {id: $id}) RETURN s.name AS name, s.type AS type, s.description AS description, s.url AS url, s.tier AS tier, s.updated AS updated",
 		map[string]any{"id": createdID},
 	)
 	if err != nil {
@@ -82,6 +84,15 @@ func TestNeo4jServiceRepository_UpdateService_Success(t *testing.T) {
 	}
 	if upd, _ := rec.Get("updated"); upd == nil {
 		t.Fatalf("expected non-nil updated timestamp, got %#v", upd)
+	}
+	if crit, ok := rec.Get("tier"); ok {
+		critInt64, ok := crit.(int64)
+		if !ok {
+			t.Fatalf("expected int64 tier from neo4j, got %T: %v", crit, crit)
+		}
+		if critInt := int(critInt64); critInt != u.Tier {
+			t.Fatalf("expected tier %d, got %d", u.Tier, critInt)
+		}
 	}
 }
 

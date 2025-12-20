@@ -36,3 +36,10 @@ func (repo mockReportRepository) GetDebtCountByService(_ context.Context) ([]rep
 	}
 	return repo.Debt, nil
 }
+
+func (repo mockReportRepository) GetServicesByTier(_ context.Context, _ int) ([]repositories.Service, error) {
+	if repo.Err != nil {
+		return nil, repo.Err
+	}
+	return repo.Services, nil
+}

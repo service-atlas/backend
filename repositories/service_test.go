@@ -69,10 +69,45 @@ func TestValidate(t *testing.T) {
 			},
 			expectError: false,
 		},
+		{
+			name: "Unset Tier",
+			service: Service{
+				Name:        "TestService",
+				ServiceType: "API",
+				Description: "A test service",
+				Url:         "https://test-service.com",
+			},
+			expectError: false,
+		},
+		{
+			name: "Tier less than 0",
+			service: Service{
+				Name:        "TestService",
+				ServiceType: "API",
+				Description: "A test service",
+				Url:         "https://test-service.com",
+				Tier:        -1,
+			},
+			expectError: true,
+			errorMsg:    "tier must be between 0 and 4",
+		},
+		{
+			name: "Tier greater than 4",
+			service: Service{
+				Name:        "TestService",
+				ServiceType: "API",
+				Description: "A test service",
+				Url:         "https://test-service.com",
+				Tier:        5,
+			},
+			expectError: true,
+			errorMsg:    "tier must be between 0 and 4",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			criticalityUnset := tt.service.Tier == 0
 			err := tt.service.Validate()
 
 			if tt.expectError {
@@ -86,6 +121,9 @@ func TestValidate(t *testing.T) {
 			} else {
 				if err != nil {
 					t.Errorf("Expected no error but got: %v", err)
+				}
+				if criticalityUnset && tt.service.Tier != 3 {
+					t.Errorf("Expected criticality to be set to 3(default), got %d", tt.service.Tier)
 				}
 			}
 		})

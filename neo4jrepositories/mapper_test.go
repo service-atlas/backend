@@ -122,6 +122,7 @@ func Test_mapNodeToService(t *testing.T) {
 		wantType        string
 		wantId          string
 		wantUrl         string
+		wantTier        int
 		wantCreated     time.Time
 		wantUpdated     time.Time
 	}{
@@ -135,6 +136,7 @@ func Test_mapNodeToService(t *testing.T) {
 				"url":         "https://example.com",
 				"created":     now,
 				"updated":     later,
+				"tier":        1,
 			}},
 			wantName:        "svc-a",
 			wantDescription: "a test service",
@@ -143,6 +145,28 @@ func Test_mapNodeToService(t *testing.T) {
 			wantUrl:         "https://example.com",
 			wantCreated:     now,
 			wantUpdated:     later,
+			wantTier:        1,
+		},
+		{
+			name: "criticality is mapped properly",
+			node: neo4j.Node{Props: map[string]any{
+				"name":        "svc-a",
+				"description": "a test service",
+				"type":        "api",
+				"id":          "svc-123",
+				"url":         "https://example.com",
+				"created":     now,
+				"updated":     later,
+				"tier":        int64(4),
+			}},
+			wantName:        "svc-a",
+			wantDescription: "a test service",
+			wantType:        "api",
+			wantId:          "svc-123",
+			wantUrl:         "https://example.com",
+			wantCreated:     now,
+			wantUpdated:     later,
+			wantTier:        4,
 		},
 		{
 			name: "missing optional properties are zero-valued",
@@ -156,6 +180,7 @@ func Test_mapNodeToService(t *testing.T) {
 			wantUrl:         "",
 			wantCreated:     time.Time{},
 			wantUpdated:     time.Time{},
+			wantTier:        0,
 		},
 		{
 			name: "incorrect types are ignored (leave zero values)",
@@ -167,6 +192,7 @@ func Test_mapNodeToService(t *testing.T) {
 				"url":         struct{}{},     // not a string
 				"created":     "yesterday",    // not time.Time
 				"updated":     3.14,           // not time.Time
+				"tier":        "high",         // not int
 			}},
 			wantName:        "",
 			wantDescription: "",
@@ -175,6 +201,7 @@ func Test_mapNodeToService(t *testing.T) {
 			wantUrl:         "",
 			wantCreated:     time.Time{},
 			wantUpdated:     time.Time{},
+			wantTier:        0,
 		},
 		{
 			name: "extra properties are ignored",
@@ -184,6 +211,7 @@ func Test_mapNodeToService(t *testing.T) {
 				"type":        "worker",
 				"id":          "svc-456",
 				"url":         "http://localhost",
+				"tier":        2,
 				"created":     now,
 				"updated":     later,
 				"foo":         "bar",
@@ -193,6 +221,7 @@ func Test_mapNodeToService(t *testing.T) {
 			wantType:        "worker",
 			wantId:          "svc-456",
 			wantUrl:         "http://localhost",
+			wantTier:        2,
 			wantCreated:     now,
 			wantUpdated:     later,
 		},
@@ -232,6 +261,9 @@ func Test_mapNodeToService(t *testing.T) {
 				}
 			} else if !got.Updated.Equal(tt.wantUpdated) {
 				t.Errorf("Updated: expected %v, got %v", tt.wantUpdated, got.Updated)
+			}
+			if tt.wantTier != got.Tier {
+				t.Errorf("Tier: expected %d, got %d", tt.wantTier, got.Tier)
 			}
 		})
 	}
