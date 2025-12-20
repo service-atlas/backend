@@ -36,7 +36,8 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 	teamHandler := teams.New(driver)
 
 	router.Get("/releases/{startDate}/{endDate}", releaseHandler.GetReleasesInDateRange)
-	router.Get("/reports/services/{id}/risk", reportHandler.GetServiceRiskReport)
+	router.Get("/reports/services/{id}/risk", reportHandler.GetComprehensiveRiskReport)
+	router.Get("/reports/services/{id}/change_risk", reportHandler.GetServiceChangeRisk)
 	router.Get("/reports/services/debt", reportHandler.GetServiceDebtReport)
 	router.Get("/reports/services/tier", reportHandler.GetServicesByTier)
 	router.Patch("/debt/{id}", debtHandler.UpdateDebtStatus)

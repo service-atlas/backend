@@ -3,13 +3,14 @@ package reports
 import (
 	"context"
 	"encoding/json"
-	"golang.org/x/sync/errgroup"
 	"log/slog"
 	"net/http"
 	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func (c *CallsHandler) GetComprehensiveRiskReport(rw http.ResponseWriter, r *http.Request) {
