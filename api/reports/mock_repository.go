@@ -9,6 +9,7 @@ import (
 type mockReportRepository struct {
 	Err      error
 	Report   *repositories.ServiceRiskReport
+	Change   *repositories.ServiceChangeRisk
 	Services []repositories.Service
 	Debt     []repositories.ServiceDebtReport
 }
@@ -18,6 +19,13 @@ func (repo mockReportRepository) GetServiceRiskReport(_ context.Context, _ strin
 		return nil, repo.Err
 	}
 	return repo.Report, nil
+}
+
+func (repo mockReportRepository) GetServiceChangeRisk(_ context.Context, _ string) (*repositories.ServiceChangeRisk, error) {
+	if repo.Err != nil {
+		return nil, repo.Err
+	}
+	return repo.Change, nil
 }
 
 func (repo mockReportRepository) GetServicesByTeam(_ context.Context, _ string) ([]repositories.Service, error) {
