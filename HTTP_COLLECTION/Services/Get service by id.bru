@@ -11,7 +11,7 @@ get {
 }
 
 params:path {
-  id: {{serviceId}}
+  id: 0fccc072-587a-46de-85d1-d8437f1d2f65
 }
 
 docs {
@@ -46,4 +46,47 @@ docs {
   | 200 OK      | Service retrieved successfully. |
   | 400 Bad Request | Invalid id parameter or service not found. |
   | 500 Internal Server Error | Failed to retrieve service due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/services/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 0fccc072-587a-46de-85d1-d8437f1d2f65
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Sat, 20 Dec 2025 02:06:22 GMT
+      content-length: 211
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": "0fccc072-587a-46de-85d1-d8437f1d2f65",
+          "name": "Port Issac",
+          "type": "service",
+          "description": "this is a test form bruno",
+          "created": "2025-12-20T02:04:22.37Z",
+          "updated": "0001-01-01T00:00:00Z",
+          "url": "https://familiar-flight.biz",
+          "criticality": 3
+        }
+      '''
+    }
+  }
 }

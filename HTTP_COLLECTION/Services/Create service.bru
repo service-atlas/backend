@@ -30,9 +30,11 @@ docs {
     "name": "NewService",
     "type": "service",
     "description": "Description of the new service",
-    "url": "http://new-service.com"
+    "url": "http://new-service.com",
+    "criticality": 1
   }
   ```
+  Note that "criticality" is optional and will default to `3`. Url is also an optional field, but will be validated if a non-empty string is passed in.
   
   ## Status Codes
   | Status Code | Description |
@@ -40,4 +42,53 @@ docs {
   | 201 Created | Service created successfully. |
   | 400 Bad Request | Invalid request body or validation error. |
   | 500 Internal Server Error | Failed to create service due to an internal server error. |
+}
+
+example {
+  name: Sample Service Creation
+  description: Sample of service returned from call
+  
+  request: {
+    url: {{baseUrl}}/services
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "name": "{{$randomCity}}",
+        "type": "service",
+        "description": "this is a test form bruno",
+        "url": "{{$randomUrl}}"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json; charset=UTF-8
+      vary: Accept-Encoding
+      date: Sat, 20 Dec 2025 02:04:22 GMT
+      content-length: 197
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": "0fccc072-587a-46de-85d1-d8437f1d2f65",
+          "name": "Port Issac",
+          "type": "service",
+          "description": "this is a test form bruno",
+          "created": "0001-01-01T00:00:00Z",
+          "updated": "0001-01-01T00:00:00Z",
+          "url": "https://familiar-flight.biz",
+          "criticality": 3
+        }
+      '''
+    }
+  }
 }

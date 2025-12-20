@@ -30,17 +30,7 @@ docs {
   ```
   
   ## Response Body
-  ```json
-  [
-    {
-      "id": "service_id",
-      "name": "Service Name",
-      "type": "service_type",
-      "description": "Description of the service",
-      "url": "http://service_url"
-    }
-  ]
-  ```
+  See `Sample Response` example
   
   ## Status Codes
   | Status Code | Description |
@@ -48,4 +38,58 @@ docs {
   | 200 OK      | Service retrieved successfully. |
   | 400 Bad Request | Invalid query parameter. |
   | 500 Internal Server Error | Failed to retrieve services due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/services/search?query=auth
+    method: GET
+    mode: none
+    params:query: {
+      query: auth
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Sat, 20 Dec 2025 02:08:10 GMT
+      content-length: 266
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": "5ba1984b-7639-42f9-b8a7-965992c9069a",
+            "name": "Authentication Database",
+            "type": "database",
+            "description": "auth db",
+            "created": "2025-12-20T02:02:44.745Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "criticality": 1
+          },
+          {
+            "id": "c622461d-9a9b-4a84-b191-820a7de0eb25",
+            "name": "Authentication API",
+            "type": "service",
+            "description": "auth service",
+            "created": "2025-12-20T02:02:45.395Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "url": "https://coarse-lawmaker.com",
+            "criticality": 1
+          }
+        ]
+      '''
+    }
+  }
 }
