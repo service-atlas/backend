@@ -11,7 +11,7 @@ get {
 }
 
 params:path {
-  id: 5931d4b0-dd0a-4654-85fe-78f42890da0d
+  id: f790a94c-33e4-4ac1-a0f3-8f9280c88453
 }
 
 docs {
@@ -25,17 +25,7 @@ docs {
   |-----------|------|-------------|
   | id      | guid  | service id |
   
-  ## Sample Response
-  ```json
-  {
-    "DebtCount": {
-      "code": 2,
-      "documentation": 1,
-      "testing": 1
-    },
-    "DependentCount": 1
-  }
-  ```
+  *See Sample Response in Examples for response body*
   
   
   ## Status Codes
@@ -44,5 +34,45 @@ docs {
   | 200 OK      | Success. |
   | 400 Bad Request | Invalid id. |
   | 404 Not Found | The service was not found. | 
-  | 500 Internal Server Error | Failed to create debt due to an internal server error. |
+  | 500 Internal Server Error | Failed to generate report due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  description: Response has a total dependent count as well as a debt count by category
+  
+  request: {
+    url: {{baseUrl}}/reports/services/:id/risk
+    method: GET
+    mode: none
+    params:path: {
+      id: f790a94c-33e4-4ac1-a0f3-8f9280c88453
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Sat, 20 Dec 2025 16:59:36 GMT
+      content-length: 72
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "debtCount": {
+            "infrastructure": 1
+          },
+          "dependentCount": 1
+        }
+      '''
+    }
+  }
 }
