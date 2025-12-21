@@ -10,3 +10,16 @@ type ServiceDebtReport struct {
 	Id    string `json:"id"`
 	Count int64  `json:"count"`
 }
+
+// ServiceChangeRisk represents the heuristic change risk classification for a service.
+// Risk is one of: "low", "medium", "high". Score is the internal numeric value used to derive Risk.
+type ServiceChangeRisk struct {
+	Risk  string `json:"risk"`
+	Score int    `json:"score,omitempty"`
+}
+
+// ComprehensiveServiceRisk represents the risk score for a service, including health and change risk.
+type ComprehensiveServiceRisk struct {
+	ChangeRisk *ServiceChangeRisk `json:"changeRisk"`
+	HealthRisk *ServiceRiskReport `json:"healthRisk"`
+}

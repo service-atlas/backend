@@ -1,0 +1,76 @@
+meta {
+  name: Service Change Risk
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/reports/services/:id/change_risk
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 1347ab0f-0187-42d8-a2e0-64633c076e2c
+}
+
+docs {
+  # Service Change Risk Report
+  
+  Returns a JSON object that quantifies service change risk based on tier and number of first and second level dependents.
+  
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | id      | guid  | service id |
+  
+  *See Sample Response In Examples for body*
+  
+  
+  ## Status Codes
+  | Status Code | Description |
+  |-------------|-------------|
+  | 200 OK      | Success. |
+  | 400 Bad Request | Invalid id. |
+  | 404 Not Found | The service was not found. | 
+  | 500 Internal Server Error | Failed to generate report to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  description: The response contains a high/medium/low and a numeric score for change risk
+  
+  request: {
+    url: {{baseUrl}}/reports/services/:id/change_risk
+    method: GET
+    mode: none
+    params:path: {
+      id: 1347ab0f-0187-42d8-a2e0-64633c076e2c
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Sat, 20 Dec 2025 16:58:13 GMT
+      content-length: 53
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "risk": "medium",
+          "score": 60
+        }
+      '''
+    }
+  }
+}

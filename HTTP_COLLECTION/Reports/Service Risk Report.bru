@@ -11,13 +11,13 @@ get {
 }
 
 params:path {
-  id: 5931d4b0-dd0a-4654-85fe-78f42890da0d
+  id: f790a94c-33e4-4ac1-a0f3-8f9280c88453
 }
 
 docs {
   # Service Risk Report
   
-  Creates a json object that quantifies service risk based on amount of technical debt and number of dependent services.
+  Creates a json object that quantifies service risk based on amount of technical debt, number of dependent services, as well as the contents of the change risk report
   
   
   ## Query Parameters
@@ -25,17 +25,7 @@ docs {
   |-----------|------|-------------|
   | id      | guid  | service id |
   
-  ## Sample Response
-  ```json
-  {
-    "DebtCount": {
-      "code": 2,
-      "documentation": 1,
-      "testing": 1
-    },
-    "DependentCount": 1
-  }
-  ```
+  *See Sample Response in Examples for response body*
   
   
   ## Status Codes
@@ -44,5 +34,51 @@ docs {
   | 200 OK      | Success. |
   | 400 Bad Request | Invalid id. |
   | 404 Not Found | The service was not found. | 
-  | 500 Internal Server Error | Failed to create debt due to an internal server error. |
+  | 500 Internal Server Error | Failed to generate report due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  description: Response contains the change risk and the health risk. Change risk is the data from the service change risk call. Health risk is a count of all types of debt and a dependent count
+  
+  request: {
+    url: {{baseUrl}}/reports/services/:id/risk
+    method: GET
+    mode: none
+    params:path: {
+      id: f790a94c-33e4-4ac1-a0f3-8f9280c88453
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Sat, 20 Dec 2025 17:40:55 GMT
+      content-length: 115
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "changeRisk": {
+            "risk": "medium",
+            "score": 40
+          },
+          "healthRisk": {
+            "debtCount": {
+              "infrastructure": 1
+            },
+            "dependentCount": 1
+          }
+        }
+      '''
+    }
+  }
 }
