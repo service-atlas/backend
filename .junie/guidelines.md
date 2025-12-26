@@ -19,3 +19,6 @@ Do not update any files in the HTTP_COLLECTION or _http_docs folders
 - **HTTP Framework**: Standard Go HTTP package
 - **Testing**: Go standard testing package
 - **Containerization**: Docker and Docker Compose
+
+## Testing
+- whenever running tests, make sure to use the `--short` flag
