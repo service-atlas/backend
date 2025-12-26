@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/go-chi/chi/v5 v5.2.3
+	github.com/go-chi/cors v1.2.2
 	github.com/testcontainers/testcontainers-go/modules/neo4j v0.39.0
 	golang.org/x/sync v0.15.0
 )

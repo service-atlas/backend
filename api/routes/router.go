@@ -12,9 +12,11 @@ import (
 	"service-atlas/api/system"
 	"service-atlas/api/teams"
 	"service-atlas/internal"
+	"service-atlas/internal/config"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
@@ -26,6 +28,8 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 	router.Use(internal.StructuredLoggerFromContext())
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Compress(5))
+
+	setupCORS(router)
 	setupSystemCalls(router)
 
 	serviceHandler := services.New(driver)
@@ -84,6 +88,14 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 		r.Get("/{teamId}/services", reportHandler.GetServicesByTeam)
 	})
 	return router
+}
+
+func setupCORS(r chi.Router) {
+	corsConfig := config.GetCORSConfig()
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: corsConfig.AllowedOrigins,
+		AllowedMethods: corsConfig.AllowedMethods,
+	}))
 }
 
 func setupSystemCalls(r chi.Router) {

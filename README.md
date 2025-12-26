@@ -111,9 +111,39 @@ The application is configured using environment variables:
 
 The server listens on port 8080 by default.
 
+### CORS Configuration
+
+The API enables CORS via middleware. You can control allowed origins and methods via the `CORS_CONFIG` environment variable. If not set or invalid, the following default configuration is used:
+
+```
+{
+  "AllowedOrigins": ["*"],
+  "AllowedMethods": ["GET", "POST", "PUT", "DELETE"]
+}
+```
+
+To provide a custom configuration, set `CORS_CONFIG` to a JSON string with the same shape. Examples:
+
+- Allow a single origin and limit methods to GET/OPTIONS:
+
+```
+export CORS_CONFIG='{"AllowedOrigins":["https://example.com"],"AllowedMethods":["GET","OPTIONS"]}'
+```
+
+- Allow multiple specific origins and common methods:
+
+```
+export CORS_CONFIG='{"AllowedOrigins":["https://app.example.com","https://admin.example.com"],"AllowedMethods":["GET","POST","PUT","DELETE","OPTIONS"]}'
+```
+
+Notes:
+- The value must be valid JSON; invalid JSON will be ignored and the default will be used.
+- `AllowedOrigins` accepts `"*"` to allow all origins or a list of exact origin URLs.
+- Only the specified HTTP methods are allowed for CORS preflight and actual requests.
+
 ## API Endpoints
 
-For more information on endpoints, see the [Bruno Collection](./HTTP_COLLECTION) or the [OAS file](./_http_docs/v1.2.0.yaml)
+For more information on endpoints, see the [Bruno Collection](./HTTP_COLLECTION)
 
 ## ChangeLog
 ### V1.4.0
