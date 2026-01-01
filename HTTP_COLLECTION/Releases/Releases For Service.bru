@@ -19,24 +19,12 @@ docs {
   
   This will return a list of releases associated with a service. The query dynamically includes properties based on their values, ensuring that empty string properties are not included in the Neo4j database.
   
-  ## Sample Response
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | id        | guid | The id for the service | 
   
-  ```json
-  [
-    {
-      "releaseDate": "2023-10-01T12:00:00Z",
-      "url": "http://example.com/v1.0"
-    },
-    {
-      "releaseDate": "2023-10-05T14:00:00Z",
-      "version": "v1.1"
-    }
-  ]
-  ```
-  
-  ## Parameters
-  
-  - **id**: The ID of the service for which to retrieve releases.
+  _See Sample Response for response body_
   
   ## Response Codes
   | Status Code | Description |
@@ -44,4 +32,57 @@ docs {
   | 200         | Successful response with a list of releases. |
   | 404         | Service not found. |
   | 400         | Invalid page or page_size parameter. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/services/:id/release
+    method: GET
+    mode: none
+    params:path: {
+      id: 9310d906-6071-4b45-8760-af4c4357e618
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Wed, 31 Dec 2025 23:57:57 GMT
+      content-length: 167
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "service_id": "9310d906-6071-4b45-8760-af4c4357e618",
+            "release_date": "2025-12-30T11:26:53Z",
+            "url": "",
+            "version": "0.4.9"
+          },
+          {
+            "service_id": "9310d906-6071-4b45-8760-af4c4357e618",
+            "release_date": "2025-12-29T08:44:04Z",
+            "url": "",
+            "version": "5.1.0"
+          },
+          {
+            "service_id": "9310d906-6071-4b45-8760-af4c4357e618",
+            "release_date": "2025-12-27T11:33:09Z",
+            "url": "",
+            "version": "6.13.20"
+          }
+        ]
+      '''
+    }
+  }
 }

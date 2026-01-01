@@ -11,7 +11,7 @@ get {
 }
 
 params:path {
-  id: c5ee7354-81b2-4a86-9041-ff70bc72bd5e
+  id: b1acb9c5-89c6-45dd-b8ba-880e148af19d
 }
 
 assert {
@@ -32,19 +32,10 @@ docs {
   
   Gets the team using the id sent in. 
   
-  ## Sample Return Object
-  ```json
-  {
-    "name": "plum",
-    "created": "2025-10-25T18:40:52.109Z",
-    "updated": "2025-10-25T18:40:52.109Z",
-    "id": "c5ee7354-81b2-4a86-9041-ff70bc72bd5e"
-  }
-  ```
-  
   ## Path Parameters
-  - id: the id of the team to get
-  
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | id        | guid | The id for the team | 
   
   ## Status Codes
   | Status Code | Description |
@@ -53,4 +44,43 @@ docs {
   | 400 Bad Request | Invalid id |
   | 404 Not Found | Team was not found by id | 
   | 500 Internal Server Error | Failed to find team due to an internal server error |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/teams/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: b1acb9c5-89c6-45dd-b8ba-880e148af19d
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Thu, 01 Jan 2026 00:14:24 GMT
+      content-length: 126
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "name": "Users Team",
+          "created": "2025-12-31T23:50:20.093Z",
+          "updated": "2025-12-31T23:50:20.093Z",
+          "id": "b1acb9c5-89c6-45dd-b8ba-880e148af19d"
+        }
+      '''
+    }
+  }
 }

@@ -12,54 +12,23 @@ get {
 
 params:path {
   startDate: 2025-05-14
-  endDate: 2025-05-20
+  endDate: 2025-12-31
 }
 
 docs {
   # Get Releases in Date Range
   
-  This call allows you to get all releases that occurred within a specified date range. The results are paginated.
+  This call allows you to get all releases that occurred within a specified date range. The results are paginated. Note dates are in `YYYY-MM-DD` format
   
   ## Parameters
+  | Parameter | Type | Location | Description |
+  |-----------|------|----|---------|
+  | startDate       | date | path | start date for the range | 
+  | endDate|  date | path | end date for the range |
+  | page | int | query | optional, defaults to 1 | 
+  | pageSize | int | query | optional, defaults to 25 | 
   
-  - **startDate**: Start date of the range, required.
-    - Example: 2025-01-01
-  - **endDate**: End date of the range, required.
-    - Example: 2025-12-31
-  - **page** (optional): Page number for pagination. Default is 1.
-    - Example: 2
-  - **pageSize** (optional): Number of items per page. Default is 25.
-    - Example: 50
-  
-  ## Sample Response
-  
-  ```json
-  {
-    "data": [
-      {
-        "releaseDate": "2024-12-25",
-        "url": "https://example.com/release1",
-        "version": "1.0.0",
-        "serviceId": "service1",
-        "serviceName": "Service One",
-        "serviceType": "Type A"
-      },
-      {
-        "releaseDate": "2024-12-31",
-        "url": "https://example.com/release2",
-        "version": "1.1.0",
-        "serviceId": "service2",
-        "serviceName": "Service Two",
-        "serviceType": "Type B"
-      }
-    ],
-    "pagination": {
-      "totalPages": 2,
-      "currentPage": 1,
-      "pageSize": 50
-    }
-  }
-  ```
+  _See Sample Response for response body_
   
   ## Response Codes
   | Status Code | Description |
@@ -67,4 +36,88 @@ docs {
   | 200         | Successful retrieval of releases in the specified date range. |
   | 400         | Bad request - Invalid start or end date, or invalid page parameters. |
   | 500         | Internal server error - An unexpected error occurred while retrieving releases. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/releases/:startDate/:endDate
+    method: GET
+    mode: none
+    params:path: {
+      startDate: 2025-05-14
+      endDate: 2025-12-31
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Wed, 31 Dec 2025 23:58:44 GMT
+      content-length: 308
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "service_name": "Order API",
+            "service_type": "service",
+            "service_id": "9310d906-6071-4b45-8760-af4c4357e618",
+            "release_date": "2025-12-30T11:26:53Z",
+            "url": "",
+            "version": "0.4.9"
+          },
+          {
+            "service_name": "Order API",
+            "service_type": "service",
+            "service_id": "9310d906-6071-4b45-8760-af4c4357e618",
+            "release_date": "2025-12-29T08:44:04Z",
+            "url": "",
+            "version": "5.1.0"
+          },
+          {
+            "service_name": "Order API",
+            "service_type": "service",
+            "service_id": "9310d906-6071-4b45-8760-af4c4357e618",
+            "release_date": "2025-12-27T11:33:09Z",
+            "url": "",
+            "version": "6.13.20"
+          },
+          {
+            "service_name": "Cart API",
+            "service_type": "service",
+            "service_id": "7ab48364-3d0f-4698-943d-94fe3ff227ec",
+            "release_date": "2025-12-25T14:10:59Z",
+            "url": "",
+            "version": "1.4.0"
+          },
+          {
+            "service_name": "Cart API",
+            "service_type": "service",
+            "service_id": "7ab48364-3d0f-4698-943d-94fe3ff227ec",
+            "release_date": "2025-12-25T05:12:15Z",
+            "url": "",
+            "version": "1.20.5"
+          },
+          {
+            "service_name": "Warehouse API",
+            "service_type": "service",
+            "service_id": "196f582d-fd54-4828-a77c-fc7f90deeaef",
+            "release_date": "2025-12-21T18:11:08Z",
+            "url": "",
+            "version": "5.0.13"
+          }
+        ]
+      '''
+    }
+  }
 }
