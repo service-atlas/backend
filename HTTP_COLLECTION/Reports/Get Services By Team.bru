@@ -11,7 +11,7 @@ get {
 }
 
 params:path {
-  id: c5ee7354-81b2-4a86-9041-ff70bc72bd5e
+  id: b1acb9c5-89c6-45dd-b8ba-880e148af19d
 }
 
 settings {
@@ -29,33 +29,86 @@ docs {
   | ------- | ---- | ----- |
   | id | guid | the team id |
   
-  ## Sample Response
-  ```json
-  [
-    {
-      "id": "426e53ad-8a3b-4648-aa1d-bde79b2ad41c",
-      "name": "East Leonardo",
-      "type": "service",
-      "description": "this is a test form bruno",
-      "created": "2025-11-02T00:56:59.298Z",
-      "updated": "0001-01-01T00:00:00Z",
-      "url": "https://trained-cricket.com"
-    },
-    {
-      "id": "173c5d9d-36b5-4de1-ba05-30e0163ba576",
-      "name": "Paterson",
-      "type": "service",
-      "description": "this is a test form bruno",
-      "created": "2025-11-03T00:45:04.056Z",
-      "updated": "0001-01-01T00:00:00Z",
-      "url": "https://pleasing-merit.name"
-    }
-  ]
-  ```
+  _See Sample Response for response body_
+  
   ## Status Codes
   | Status Code | Description |
   |-------------|-------------|
   | 200 OK      | Services retrieved successfully |
   | 400 Bad Request | Invalid team id |
   | 500 Internal Server Error | Failed to retrieve services due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/teams/:id/services
+    method: GET
+    mode: none
+    params:path: {
+      id: b1acb9c5-89c6-45dd-b8ba-880e148af19d
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Thu, 01 Jan 2026 00:10:03 GMT
+      content-length: 387
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": "cf84195b-1101-4d69-9618-fc165fef29e5",
+            "name": "Customer API",
+            "type": "service",
+            "description": "customer api",
+            "created": "2025-12-31T23:50:19.311Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "url": "https://homely-mentor.net/",
+            "tier": 1
+          },
+          {
+            "id": "b1b6d5af-6cc8-4568-a852-de7c792a7ddc",
+            "name": "Customer Database",
+            "type": "database",
+            "description": "customer database",
+            "created": "2025-12-31T23:50:19.282Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "url": "https://likable-bowler.org",
+            "tier": 3
+          },
+          {
+            "id": "04ad317f-6074-4e33-bdd7-46a5a2563bb1",
+            "name": "Authentication Database",
+            "type": "database",
+            "description": "auth db",
+            "created": "2025-12-31T23:50:18.027Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "tier": 1
+          },
+          {
+            "id": "316a05fb-2e83-4c93-b3c5-41490f8c1afc",
+            "name": "Authentication API",
+            "type": "service",
+            "description": "auth service",
+            "created": "2025-12-31T23:50:18.632Z",
+            "updated": "0001-01-01T00:00:00Z",
+            "url": "https://delirious-spork.info",
+            "tier": 1
+          }
+        ]
+      '''
+    }
+  }
 }

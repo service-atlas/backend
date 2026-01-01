@@ -25,24 +25,13 @@ docs {
   This call gets a paginated list of all teams in the database, ordered by the created date descending
   
   
-  ## Parameters
+  ## Query Parameters
   | Parameter | Type | Description |
   |-----------|------|-------------|
   | page      | int  | The page number. Must be positive. |
   | pageSize  | int  | The number of items per page. Must be between 1 and 100. (default: 10) |
   
   
-  ## Sample Response
-  ```json
-  [
-    {
-      "name": "plum",
-      "created": "2025-10-25T18:40:52.109Z",
-      "updated": "2025-10-25T18:40:52.109Z",
-      "id": "c5ee7354-81b2-4a86-9041-ff70bc72bd5e"
-    }
-  ]
-  ```
   
   ## Status Codes
   | Status Code | Description |
@@ -50,4 +39,58 @@ docs {
   | 200 OK      | Teams retrieved successfully. |
   | 400 Bad Request | Invalid page or pageSize parameter. |
   | 500 Internal Server Error | Failed to retrieve teams due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/teams?page=1&pageSize=10
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      pageSize: 10
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Thu, 01 Jan 2026 00:09:49 GMT
+      content-length: 211
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "name": "Users Team",
+            "created": "2025-12-31T23:50:20.093Z",
+            "updated": "2025-12-31T23:50:20.093Z",
+            "id": "b1acb9c5-89c6-45dd-b8ba-880e148af19d"
+          },
+          {
+            "name": "Shop Team",
+            "created": "2025-12-31T23:50:20.056Z",
+            "updated": "2025-12-31T23:50:20.056Z",
+            "id": "a07be239-66fa-4c2e-a795-aa0645039349"
+          },
+          {
+            "name": "Warehouse Team",
+            "created": "2025-12-31T23:50:20.003Z",
+            "updated": "2025-12-31T23:50:20.003Z",
+            "id": "bb5de6c3-71af-4951-971a-0cbba1cb3e1b"
+          }
+        ]
+      '''
+    }
+  }
 }

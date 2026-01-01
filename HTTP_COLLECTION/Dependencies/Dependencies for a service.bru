@@ -19,22 +19,12 @@ docs {
   
   Allows you to get all dependencies for a service
   
-  ## Sample Response
-  This will return an array of first level linked dependencies
-  ```json
-  [
-    {
-      "name": "service 1",
-      "id": "1",
-      "type": "service"
-    },
-    {
-      "name": "database 1",
-      "id": "2",
-      "type": "database"
-    }
-  ]
-  ```
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | id        | guid | The id for the service | 
+  
+  _See Sample Response for response body_
   
   ## Response Codes
    | Status Code | Description |
@@ -44,4 +34,44 @@ docs {
     | 404 Not Found | Service not found. |
     | 500 Internal Server Error | Failed to retrieve dependencies due to an internal server error. |
   
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/services/:id/dependencies
+    method: GET
+    mode: none
+    params:path: {
+      id: {{serviceId}}
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Wed, 31 Dec 2025 23:53:48 GMT
+      content-length: 115
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": "04ad317f-6074-4e33-bdd7-46a5a2563bb1",
+            "name": "Authentication Database",
+            "type": "database"
+          }
+        ]
+      '''
+    }
+  }
 }

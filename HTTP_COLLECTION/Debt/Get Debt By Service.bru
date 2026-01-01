@@ -43,18 +43,7 @@ docs {
   GET {{baseUrl}}/services/:id/debt?page=1&pageSize=10
   ```
   
-  ## Response Body
-  ```json
-  [
-    {
-      "serviceId": "5931d4b0-dd0a-4654-85fe-78f42890da0d",
-      "type": "code",
-      "title": "Minaland",
-      "description": "revolutionize B2B supply-chains",
-      "status": "pending"
-    }
-  ]
-  ```
+  _See Sample Response for response body_
   
   ## Status Codes
   | Status Code | Description |
@@ -62,4 +51,61 @@ docs {
   | 200 OK      | Service debt retrieved successfully. |
   | 400 Bad Request | Invalid page or pageSize parameter. |
   | 500 Internal Server Error | Failed to retrieve debt due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/services/:id/debt
+    method: GET
+    mode: none
+    params:query: {
+      ~onlyResolved: true
+      ~page: 1
+      ~pageSize: 25
+    }
+  
+    params:path: {
+      id: {{serviceId}}
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Wed, 31 Dec 2025 23:52:22 GMT
+      content-length: 256
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "serviceId": "316a05fb-2e83-4c93-b3c5-41490f8c1afc",
+            "type": "documentation",
+            "title": "oauth documentation",
+            "description": "there is very little oauth documentation",
+            "status": "pending",
+            "id": "966f12f6-e99b-49b6-8701-29d39e59fbc2"
+          },
+          {
+            "serviceId": "316a05fb-2e83-4c93-b3c5-41490f8c1afc",
+            "type": "code",
+            "title": "dotnet 5",
+            "description": "service is several major versions behind",
+            "status": "pending",
+            "id": "307349a8-6033-4003-835f-8fb968871848"
+          }
+        ]
+      '''
+    }
+  }
 }

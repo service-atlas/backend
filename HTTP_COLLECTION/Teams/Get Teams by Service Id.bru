@@ -19,7 +19,7 @@ docs {
   
   This endpoint allows you to get a list of teams that own (or are associated with) a particular service
   
-  ## Parameters
+  ## Path Parameters
   | Parameter | Type | Description |
   |-----------|------|-------------|
   | id        | string | The unique identifier of the service. |
@@ -29,16 +29,6 @@ docs {
   GET {{baseUrl}}/services/5931d4b0-dd0a-4654-85fe-78f42890da0d/teams
   ```
   
-  ## Response Body
-  ```json
-  [
-    {
-      "Name": "team 1",
-      "Id": "4931d4b0-dd0a-4654-85fe-78f42890da0d"
-    }
-  ]
-  ```
-  
   ## Status Codes
   | Status Code | Description |
   |-------------|-------------|
@@ -46,4 +36,45 @@ docs {
   | 400 Bad Request | Invalid id parameter. |
   | 404 Not Found | Service with the given id not found. |
   | 500 Internal Server Error | Failed to retrieve teams due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/services/:id/teams
+    method: GET
+    mode: none
+    params:path: {
+      id: {{serviceId}}
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Thu, 01 Jan 2026 00:15:07 GMT
+      content-length: 128
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "name": "Users Team",
+            "created": "2025-12-31T23:50:20.093Z",
+            "updated": "2025-12-31T23:50:20.093Z",
+            "id": "b1acb9c5-89c6-45dd-b8ba-880e148af19d"
+          }
+        ]
+      '''
+    }
+  }
 }

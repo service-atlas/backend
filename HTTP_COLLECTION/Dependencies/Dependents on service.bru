@@ -15,7 +15,7 @@ params:query {
 }
 
 params:path {
-  id: 12973952-0165-400b-9178-a0fdbd90f967
+  id: 04ad317f-6074-4e33-bdd7-46a5a2563bb1
 }
 
 docs {
@@ -29,22 +29,8 @@ docs {
   | id | path | id of service to find dependents of |
   | version | query | optional search to limit return data to dependents that require a specific version | 
   
-  ## Returns
-  This will return an array of first level linked dependencies
-  ```json
-  [
-    {
-      "name": "service 1",
-      "id": "1",
-      "type": "service"
-    },
-    {
-      "name": "database 1",
-      "id": "2",
-      "type": "database"
-    }
-  ]
-  ```
+  _See Sample Response for response body_
+  
   ## Response Codes
    | Status Code | Description |
     |-------------|-------------|
@@ -52,4 +38,48 @@ docs {
     | 400 Bad Request | Invalid id parameter.  |
     | 404 Not Found | Service not found. |
     | 500 Internal Server Error | Failed to retrieve dependencies due to an internal server error. |
+}
+
+example {
+  name: Sample Response
+  
+  request: {
+    url: {{baseUrl}}/services/:id/dependents
+    method: GET
+    mode: none
+    params:query: {
+      ~version: 1.5.0
+    }
+  
+    params:path: {
+      id: 04ad317f-6074-4e33-bdd7-46a5a2563bb1
+    }
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Accept-Encoding
+      date: Wed, 31 Dec 2025 23:56:20 GMT
+      content-length: 115
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": "316a05fb-2e83-4c93-b3c5-41490f8c1afc",
+            "name": "Authentication API",
+            "type": "service"
+          }
+        ]
+      '''
+    }
+  }
 }
