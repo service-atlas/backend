@@ -2,8 +2,8 @@ name: Build and Push Docker image
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 3 * * 2' # Tuesdays at 03:00 UTC
+  release:
+    types: [published]
 
 permissions:
   contents: read
