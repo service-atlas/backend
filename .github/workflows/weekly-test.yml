@@ -37,10 +37,10 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: app-token
-        uses: tibdex/github-app-token@v2
+        uses: actions/create-github-app-token@v2
         with:
-          app_id: ${{ secrets.COVERAGE_APP_ID }}
-          private_key: ${{ secrets.COVERAGE_SECRET }}
+          app-id: ${{ secrets.COVERAGE_APP_ID }}
+          private-key: ${{ secrets.COVERAGE_SECRET }}
 
       - uses: actions/checkout@v4
         name: Checkout
@@ -54,16 +54,16 @@ jobs:
       - name: run tests
         shell: bash
         run: |
-          go test --short -v ./... -covermode=count -coverprofile=coverage.out
+          go test -v ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
       - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
-        uses: tj-actions/coverage-badge-go@v2
+        uses: tj-actions/coverage-badge-go@v3
         with:
           filename: coverage.out
 
       - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v17
+        uses: tj-actions/verify-changed-files@v20.0.4
         id: verify-changed-files
         with:
           files: README.md
