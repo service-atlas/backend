@@ -10,13 +10,12 @@ on:
       - opened
 env:
   HEAD_REF: ${{ github.head_ref }}
-  GO_VERSION: 1.25.3
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Cache Go modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build
@@ -28,7 +27,7 @@ jobs:
 
       - uses: actions/setup-go@v5.5.0
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version: ${{ vars.GO_VERSION }}
 
       - name: build
         shell: bash
@@ -47,7 +46,7 @@ jobs:
 
       - uses: actions/setup-go@v5.5.0
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version: ${{ vars.GO_VERSION }}
 
       - name: run tests
         shell: bash
