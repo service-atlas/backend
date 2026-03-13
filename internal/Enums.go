@@ -36,7 +36,7 @@ var Exposure = StringEnum{
 	members: []string{"public", "private", "mixed"},
 }
 
-var ComplianceDomains = StringEnum{
+var ImpactDomain = StringEnum{
 	members: []string{"revenue", "compliance", "data", "security"},
 }
 
