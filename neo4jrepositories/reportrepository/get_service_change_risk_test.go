@@ -36,8 +36,7 @@ func TestNeo4jReportRepository_GetServiceChangeRisk_NotFound(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for non-existent service")
 	}
-	var httpErr *customerrors.HTTPError
-	if !errors.As(err, &httpErr) || httpErr.Status != 404 {
+	if httpErr, ok := errors.AsType[*customerrors.HTTPError](err); !ok || httpErr.Status != 404 {
 		t.Fatalf("expected HTTP 404 error, got %T: %v", err, err)
 	}
 }

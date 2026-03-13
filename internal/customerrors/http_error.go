@@ -15,8 +15,7 @@ func (e HTTPError) Error() string {
 }
 
 func HandleError(rw http.ResponseWriter, err error) {
-	var httpErr *HTTPError
-	if errors.As(err, &httpErr) {
+	if httpErr, ok := errors.AsType[*HTTPError](err); ok {
 		http.Error(rw, httpErr.Error(), httpErr.Status)
 	} else {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)

@@ -78,7 +78,7 @@ Releases will always have a date; releases without a date are assigned `now()` a
 
 ### Prerequisites
 
-- Go 1.21 or higher
+- Go 1.26 or higher
 - Neo4j database
 - Docker and Docker Compose (optional, for local development)
 
