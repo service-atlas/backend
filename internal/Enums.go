@@ -31,3 +31,15 @@ var DebtTypes = StringEnum{
 var DebtStatus = StringEnum{
 	members: []string{"pending", "remediated", "in_progress"},
 }
+
+var Exposure = StringEnum{
+	members: []string{"public", "private", "mixed"},
+}
+
+var ComplianceDomains = StringEnum{
+	members: []string{"revenue", "compliance", "data", "security"},
+}
+
+var ArchitectureRole = StringEnum{
+	members: []string{"entrypoint", "application", "infrastructure", "data"},
+}
