@@ -3,18 +3,23 @@ package repositories
 import (
 	"errors"
 	"net/url"
+	"service-atlas/internal"
+	"strings"
 	"time"
 )
 
 type Service struct {
-	Id          string    `json:"id,omitempty"`
-	Name        string    `json:"name"`
-	ServiceType string    `json:"type"`
-	Description string    `json:"description"`
-	Created     time.Time `json:"created"`
-	Updated     time.Time `json:"updated,omitempty"`
-	Url         string    `json:"url,omitempty"`
-	Tier        int       `json:"tier"`
+	Id               string    `json:"id,omitempty"`
+	Name             string    `json:"name"`
+	ServiceType      string    `json:"type"`
+	Description      string    `json:"description"`
+	Created          time.Time `json:"created"`
+	Updated          time.Time `json:"updated,omitempty"`
+	Url              string    `json:"url,omitempty"`
+	Tier             int       `json:"tier"`
+	ArchitectureRole string    `json:"architecture_role,omitempty"`
+	Exposure         string    `json:"exposure,omitempty"`
+	ImpactDomain     []string  `json:"impact_domain,omitempty"`
 }
 
 func (service *Service) Validate() error {
@@ -38,6 +43,26 @@ func (service *Service) Validate() error {
 	}
 	if service.Tier < 0 || service.Tier > 4 {
 		return errors.New("tier must be between 0 and 4")
+	}
+	if service.ArchitectureRole != "" {
+		service.ArchitectureRole = strings.ToLower(service.ArchitectureRole)
+		if !internal.ArchitectureRole.IsMember(service.ArchitectureRole) {
+			return errors.New("invalid architecture role")
+		}
+	}
+	if service.Exposure != "" {
+		service.Exposure = strings.ToLower(service.Exposure)
+		if !internal.Exposure.IsMember(service.Exposure) {
+			return errors.New("invalid exposure")
+		}
+	}
+	if len(service.ImpactDomain) > 0 {
+		for i := range service.ImpactDomain {
+			service.ImpactDomain[i] = strings.ToLower(service.ImpactDomain[i])
+			if !internal.ImpactDomain.IsMember(service.ImpactDomain[i]) {
+				return errors.New("invalid impact domain")
+			}
+		}
 	}
 
 	return nil

@@ -40,15 +40,21 @@ func (d *Neo4jServiceRepository) UpdateService(ctx context.Context, service repo
 				s.description = $description,
 				s.url = $url,
 				s.tier = $tier,
+				s.architecture_role = $architecture_role,
+				s.exposure = $exposure,
+				s.impact_domain = $impact_domain,
 				s.updated = datetime()
 			RETURN s
 		`, map[string]any{
-			"id":          service.Id,
-			"name":        service.Name,
-			"type":        service.ServiceType,
-			"description": service.Description,
-			"url":         service.Url,
-			"tier":        service.Tier,
+			"id":                service.Id,
+			"name":              service.Name,
+			"type":              service.ServiceType,
+			"description":       service.Description,
+			"url":               service.Url,
+			"tier":              service.Tier,
+			"architecture_role": service.ArchitectureRole,
+			"exposure":          service.Exposure,
+			"impact_domain":     service.ImpactDomain,
 		})
 
 		if updateErr != nil {

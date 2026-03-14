@@ -12,10 +12,13 @@ func TestValidate(t *testing.T) {
 		{
 			name: "Valid service",
 			service: Service{
-				Name:        "TestService",
-				ServiceType: "API",
-				Description: "A test service",
-				Url:         "https://test-service.com",
+				Name:             "TestService",
+				ServiceType:      "API",
+				Description:      "A test service",
+				Url:              "https://test-service.com",
+				ImpactDomain:     []string{"revenue"},
+				ArchitectureRole: "application",
+				Exposure:         "public",
 			},
 			expectError: false,
 		},
@@ -102,6 +105,46 @@ func TestValidate(t *testing.T) {
 			},
 			expectError: true,
 			errorMsg:    "tier must be between 0 and 4",
+		},
+		{
+			name: "Invalid architecture role",
+			service: Service{
+				Name:             "TestService",
+				ServiceType:      "API",
+				ArchitectureRole: "invalid",
+			},
+			expectError: true,
+			errorMsg:    "invalid architecture role",
+		},
+		{
+			name: "Invalid exposure",
+			service: Service{
+				Name:        "TestService",
+				ServiceType: "API",
+				Exposure:    "invalid",
+			},
+			expectError: true,
+			errorMsg:    "invalid exposure",
+		},
+		{
+			name: "Invalid impact domain",
+			service: Service{
+				Name:         "TestService",
+				ServiceType:  "API",
+				ImpactDomain: []string{"invalid"},
+			},
+			expectError: true,
+			errorMsg:    "invalid impact domain",
+		},
+		{
+			name: "Multiple impact domains, one invalid",
+			service: Service{
+				Name:         "TestService",
+				ServiceType:  "API",
+				ImpactDomain: []string{"revenue", "invalid"},
+			},
+			expectError: true,
+			errorMsg:    "invalid impact domain",
 		},
 	}
 
