@@ -65,6 +65,28 @@ func MapNodeToService(n neo4j.Node) repositories.Service {
 			svc.Updated = dateStr
 		}
 	}
+
+	if role, ok := n.Props["architecture_role"]; ok {
+		if roleStr, ok := role.(string); ok {
+			svc.ArchitectureRole = roleStr
+		}
+	}
+
+	if exposure, ok := n.Props["exposure"]; ok {
+		if exposureStr, ok := exposure.(string); ok {
+			svc.Exposure = exposureStr
+		}
+	}
+
+	if domain, ok := n.Props["impact_domain"]; ok {
+		if domainList, ok := domain.([]any); ok {
+			for _, d := range domainList {
+				if dStr, ok := d.(string); ok {
+					svc.ImpactDomain = append(svc.ImpactDomain, dStr)
+				}
+			}
+		}
+	}
 	return svc
 }
 
