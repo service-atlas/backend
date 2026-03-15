@@ -33,11 +33,14 @@ func TestNeo4jServiceRepository_CreateService_Success(t *testing.T) {
 
 	// Act: create service
 	input := repositories.Service{
-		Name:        "svc-create",
-		Description: "created service",
-		ServiceType: "api",
-		Url:         "https://svc-create",
-		Tier:        1,
+		Name:             "svc-create",
+		Description:      "created service",
+		ServiceType:      "api",
+		Url:              "https://svc-create",
+		Tier:             1,
+		ArchitectureRole: "application",
+		Exposure:         "public",
+		ImpactDomain:     []string{"revenue", "security"},
 	}
 	id, err := repo.CreateService(ctx, input)
 	if err != nil {
@@ -51,7 +54,7 @@ func TestNeo4jServiceRepository_CreateService_Success(t *testing.T) {
 	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer func() { _ = read.Close(ctx) }()
 	res, err := read.Run(ctx,
-		"MATCH (s:Service {id: $id}) RETURN s.name AS name, s.type AS type, s.description AS description, s.url AS url, s.tier AS tier, s.created AS created",
+		"MATCH (s:Service {id: $id}) RETURN s.name AS name, s.type AS type, s.description AS description, s.url AS url, s.tier AS tier, s.created AS created, s.architecture_role AS architecture_role, s.exposure AS exposure, s.impact_domain AS impact_domain",
 		map[string]any{"id": id},
 	)
 	if err != nil {
@@ -80,5 +83,24 @@ func TestNeo4jServiceRepository_CreateService_Success(t *testing.T) {
 		if int(crit.(int64)) != input.Tier {
 			t.Fatalf("expected tier %d, got %d", input.Tier, crit)
 		}
+	}
+	if role, _ := rec.Get("architecture_role"); role != input.ArchitectureRole {
+		t.Fatalf("expected architecture_role %q, got %v", input.ArchitectureRole, role)
+	}
+	if exposure, _ := rec.Get("exposure"); exposure != input.Exposure {
+		t.Fatalf("expected exposure %q, got %v", input.Exposure, exposure)
+	}
+	if domain, _ := rec.Get("impact_domain"); domain != nil {
+		domainList := domain.([]any)
+		if len(domainList) != len(input.ImpactDomain) {
+			t.Fatalf("expected impact_domain length %d, got %d", len(input.ImpactDomain), len(domainList))
+		}
+		for i, d := range domainList {
+			if d.(string) != input.ImpactDomain[i] {
+				t.Fatalf("expected impact_domain[%d] %q, got %q", i, input.ImpactDomain[i], d)
+			}
+		}
+	} else {
+		t.Fatalf("expected non-nil impact_domain")
 	}
 }
