@@ -28,8 +28,33 @@ This API allows you to:
 - Ability to add technical debt to a service
 - Classify services by operational criticality using Service Tiers (1–4)
 
+## Design Philosophy
+
+### What Service Atlas Is
+
+Service Atlas is a tool for understanding and surfacing relationships between systems. It exists to answer one core question: *if something changes or fails here, what else is affected?*
+
+Debt and release tracking exist solely to support risk analysis — they are not project management tools or replacements for your work tracking software.
+
+### What Service Atlas Is Not
+
+**It is not an infrastructure catalog.** An API gateway and the lambdas behind it are one service — the thing your team ships and operates as a cohesive unit. The underlying cloud resources that implement it are irrelevant to the graph.
+
+**It is not a CMDB.** Service Atlas models what engineers think about and own, not every resource that exists in your cloud account. A catalog of 10,000 items where no one can find the 50 things they care about has negative value.
+
+**It is not an incident management system.** It informs incident response by surfacing blast radius and ownership, but it does not replace your alerting, on-call, or postmortem tooling.
+
+### Design Principles
+
+- **Simple by design** — a service requires only a name and a type to exist. Complexity should never be a barrier to adoption.
+- **Logical over physical** — model systems as engineers understand them, not as infrastructure defines them.
+- **Relationships over inventory** — the graph is the value. A service in isolation is just a record.
+- **Advisory not prescriptive** — risk scores support human judgment. They do not enforce policy or predict outcomes.
+- **Engineer-first** — value should flow to the people doing the work, not only upward to leadership.
+
+
 ## What is a "Service"
-A service is any object that you wish to track as part of your catalog of objects. This can be databases, apis, servers, or anything else.
+A service is a distinct, independently deployable component of a larger platform. The unit of meaning is logical, not physical — it is the thing your team reasons about, names, owns, and ships.
 Service was chosen as the initial use case for this api was to catalog microservices and relations between them. Services can `depend_on` other services and have `releases` associated with them
 
 ```mermaid
