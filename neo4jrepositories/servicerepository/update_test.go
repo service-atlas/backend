@@ -6,6 +6,7 @@ import (
 	"service-atlas/internal/customerrors"
 	nRepo "service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
+	"strings"
 	"testing"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
@@ -76,8 +77,8 @@ func TestNeo4jServiceRepository_UpdateService_Success(t *testing.T) {
 	if name, _ := rec.Get("name"); name != u.Name {
 		t.Fatalf("expected name %q, got %q", u.Name, name)
 	}
-	if typ, _ := rec.Get("type"); typ != u.ServiceType {
-		t.Fatalf("expected type %q, got %q", u.ServiceType, typ)
+	if typ, _ := rec.Get("type"); typ != strings.ToUpper(u.ServiceType) {
+		t.Fatalf("expected type %q, got %q", strings.ToUpper(u.ServiceType), typ)
 	}
 	if desc, _ := rec.Get("description"); desc != u.Description {
 		t.Fatalf("expected description %q, got %q", u.Description, desc)

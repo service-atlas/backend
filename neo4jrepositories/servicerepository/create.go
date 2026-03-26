@@ -3,6 +3,7 @@ package servicerepository
 import (
 	"context"
 	"service-atlas/repositories"
+	"strings"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
@@ -26,7 +27,7 @@ func (d *Neo4jServiceRepository) CreateService(ctx context.Context, service repo
         RETURN n.id AS id
         `, map[string]any{
 				"name":              service.Name,
-				"type":              service.ServiceType,
+				"type":              strings.ToUpper(service.ServiceType),
 				"description":       service.Description,
 				"url":               service.Url,
 				"tier":              service.Tier,

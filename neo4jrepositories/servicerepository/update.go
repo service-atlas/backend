@@ -5,6 +5,7 @@ import (
 	"errors"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
+	"strings"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
@@ -48,7 +49,7 @@ func (d *Neo4jServiceRepository) UpdateService(ctx context.Context, service repo
 		`, map[string]any{
 			"id":                service.Id,
 			"name":              service.Name,
-			"type":              service.ServiceType,
+			"type":              strings.ToUpper(service.ServiceType),
 			"description":       service.Description,
 			"url":               service.Url,
 			"tier":              service.Tier,
