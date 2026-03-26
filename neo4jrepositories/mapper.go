@@ -1,27 +1,12 @@
 package neo4jrepositories
 
 import (
+	"service-atlas/internal"
 	"service-atlas/repositories"
-	"strings"
 	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
-
-func toTitleCase(s string) string {
-	if len(s) == 0 {
-		return s
-	}
-	s = strings.ToLower(s)
-	words := strings.Split(s, " ")
-	for i, w := range words {
-		if len(w) > 0 {
-			words[i] = strings.ToUpper(w[:1]) + w[1:]
-		}
-
-	}
-	return strings.Join(words, " ")
-}
 
 // MapNodeToService converts a Neo4j node to a Service object
 func MapNodeToService(n neo4j.Node) repositories.Service {
@@ -44,7 +29,7 @@ func MapNodeToService(n neo4j.Node) repositories.Service {
 	// Safely extract service type with validation
 	if svcType, ok := n.Props["type"]; ok {
 		if typeStr, ok := svcType.(string); ok {
-			svc.ServiceType = toTitleCase(typeStr)
+			svc.ServiceType = internal.ToTitleCase(typeStr)
 		}
 	}
 
