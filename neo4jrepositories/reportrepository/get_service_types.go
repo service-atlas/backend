@@ -3,6 +3,7 @@ package reportrepository
 import (
 	"context"
 	"errors"
+	"service-atlas/internal"
 	"service-atlas/repositories"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
@@ -31,7 +32,7 @@ func (r Neo4jReportRepository) GetServiceTypes(ctx context.Context) ([]repositor
 				return nil, errors.New("type not found")
 			}
 			serviceType := repositories.ServiceType{}
-			serviceType.Type = t.(string)
+			serviceType.Type = internal.ToTitleCase(t.(string))
 			count, ok := record.Get("count")
 			if !ok {
 				return nil, errors.New("count not found")
