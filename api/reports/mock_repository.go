@@ -7,11 +7,12 @@ import (
 
 // mockReportRepository is a mock implementation of the ReportRepository interface
 type mockReportRepository struct {
-	Err      error
-	Report   *repositories.ServiceRiskReport
-	Change   *repositories.ServiceChangeRisk
-	Services []repositories.Service
-	Debt     []repositories.ServiceDebtReport
+	Err          error
+	Report       *repositories.ServiceRiskReport
+	Change       *repositories.ServiceChangeRisk
+	Services     []repositories.Service
+	Debt         []repositories.ServiceDebtReport
+	ServiceTypes []repositories.ServiceType
 }
 
 func (repo mockReportRepository) GetServiceRiskReport(_ context.Context, _ string) (*repositories.ServiceRiskReport, error) {
@@ -50,4 +51,12 @@ func (repo mockReportRepository) GetServicesByTier(_ context.Context, _ int) ([]
 		return nil, repo.Err
 	}
 	return repo.Services, nil
+}
+
+func (repo mockReportRepository) GetServiceTypes(_ context.Context) ([]repositories.ServiceType, error) {
+	if repo.Err != nil {
+		return nil, repo.Err
+	}
+	return repo.ServiceTypes, nil
+
 }
