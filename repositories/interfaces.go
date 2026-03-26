@@ -67,6 +67,8 @@ type ReportRepository interface {
 	GetDebtCountByService(ctx context.Context) ([]ServiceDebtReport, error)
 	// GetServicesByTier retrieves all services on a given criticality tier.
 	GetServicesByTier(ctx context.Context, tier int) ([]Service, error)
+	// GetServiceTypes retrieves all service types and counts for each type.
+	GetServiceTypes(ctx context.Context) ([]ServiceType, error)
 }
 
 // TeamRepository defines the methods for interacting with teams.

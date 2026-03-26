@@ -23,3 +23,9 @@ type ComprehensiveServiceRisk struct {
 	ChangeRisk *ServiceChangeRisk `json:"changeRisk"`
 	HealthRisk *ServiceRiskReport `json:"healthRisk"`
 }
+
+// ServiceType represents a service type with its type and associated count.
+type ServiceType struct {
+	Type  string `json:"type"`
+	Count int64  `json:"count"`
+}
