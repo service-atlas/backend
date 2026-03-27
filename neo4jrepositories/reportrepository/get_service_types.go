@@ -10,8 +10,8 @@ import (
 )
 
 func (r Neo4jReportRepository) GetServiceTypes(ctx context.Context) ([]repositories.ServiceType, error) {
-	var typeReport []repositories.ServiceType
-	_, err := r.manager.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+
+	result, err := r.manager.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		typeCountQuery := `
 			MATCH (s:Service)
 			RETURN s.type AS type, count(*) AS count
@@ -26,6 +26,7 @@ func (r Neo4jReportRepository) GetServiceTypes(ctx context.Context) ([]repositor
 		if err != nil {
 			return nil, err
 		}
+		var localReport []repositories.ServiceType
 		for _, record := range records {
 			t, ok := record.Get("type")
 			if !ok {
@@ -38,13 +39,13 @@ func (r Neo4jReportRepository) GetServiceTypes(ctx context.Context) ([]repositor
 				return nil, errors.New("count not found")
 			}
 			serviceType.Count = count.(int64)
-			typeReport = append(typeReport, serviceType)
+			localReport = append(localReport, serviceType)
 		}
 
-		return nil, nil
+		return localReport, nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return typeReport, nil
+	return result.([]repositories.ServiceType), nil
 }
