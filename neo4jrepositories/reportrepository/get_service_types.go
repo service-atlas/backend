@@ -10,7 +10,7 @@ import (
 )
 
 func (r Neo4jReportRepository) GetServiceTypes(ctx context.Context) ([]repositories.ServiceType, error) {
-	typeReport := make([]repositories.ServiceType, 2)
+	var typeReport []repositories.ServiceType
 	_, err := r.manager.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		typeCountQuery := `
 			MATCH (s:Service)
