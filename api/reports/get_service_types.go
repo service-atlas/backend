@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
+	"service-atlas/repositories"
 	"time"
 )
 
@@ -19,6 +20,9 @@ func (c *CallsHandler) GetServiceTypes(rw http.ResponseWriter, r *http.Request) 
 		logger.Error("Error getting service types:", slog.String("error", err.Error()))
 		customerrors.HandleError(rw, err)
 		return
+	}
+	if serviceTypes == nil {
+		serviceTypes = []repositories.ServiceType{}
 	}
 	rw.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(rw).Encode(serviceTypes)

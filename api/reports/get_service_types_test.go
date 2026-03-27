@@ -54,6 +54,34 @@ func TestGetServiceTypes_Success(t *testing.T) {
 	}
 }
 
+func TestGetServiceTypes_Empty(t *testing.T) {
+	// Arrange
+	h := CallsHandler{repository: mockReportRepository{ServiceTypes: nil}}
+
+	req, err := http.NewRequest("GET", "/services/types", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	rw := httptest.NewRecorder()
+
+	// Act
+	h.GetServiceTypes(rw, req)
+
+	// Assert
+	if rw.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rw.Code)
+	}
+	if got := rw.Header().Get("Content-Type"); got != "application/json" {
+		t.Fatalf("expected content-type application/json, got %q", got)
+	}
+
+	// Body should be [] not null
+	if got := rw.Body.String(); got != "[]\n" {
+		t.Fatalf("expected body [], got %q", got)
+	}
+}
+
 func TestGetServiceTypes_RepoError(t *testing.T) {
 	// Arrange
 	h := CallsHandler{repository: mockReportRepository{Err: errors.New("database failure")}}
