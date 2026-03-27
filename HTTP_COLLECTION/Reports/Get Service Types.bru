@@ -1,0 +1,80 @@
+meta {
+  name: Get Service Types
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/services/types
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  # Get Service Types
+  
+  Gets a list of all service types and the count of each type. Normalizes to title case
+  
+  ## Responses
+  | Code | Notes |
+  | --- | --- |
+  | 200 | Returns data |
+  | 500 | Server Error |
+}
+
+example {
+  name: Sample Call
+  
+  request: {
+    url: {{baseUrl}}/services/types
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    headers: {
+      content-type: application/json
+      vary: Origin, Accept-Encoding
+      date: Fri, 27 Mar 2026 00:05:39 GMT
+      content-length: 106
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "type": "Service",
+            "count": 6
+          },
+          {
+            "type": "Database",
+            "count": 5
+          },
+          {
+            "type": "Front End",
+            "count": 4
+          },
+          {
+            "type": "Cache",
+            "count": 2
+          },
+          {
+            "type": "Event_bus",
+            "count": 1
+          }
+        ]
+      '''
+    }
+  }
+}
