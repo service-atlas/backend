@@ -33,12 +33,27 @@ func (r Neo4jReportRepository) GetServiceTypes(ctx context.Context) ([]repositor
 				return nil, errors.New("type not found")
 			}
 			serviceType := repositories.ServiceType{}
-			serviceType.Type = internal.ToTitleCase(t.(string))
+			if t == nil {
+				return nil, errors.New("type value is nil")
+			}
+			tVal, ok := t.(string)
+			if !ok {
+				return nil, errors.New("type value is not a string")
+			}
+			serviceType.Type = internal.ToTitleCase(tVal)
+
 			count, ok := record.Get("count")
 			if !ok {
 				return nil, errors.New("count not found")
 			}
-			serviceType.Count = count.(int64)
+			if count == nil {
+				return nil, errors.New("count value is nil")
+			}
+			countVal, ok := count.(int64)
+			if !ok {
+				return nil, errors.New("count value is not an int64")
+			}
+			serviceType.Count = countVal
 			localReport = append(localReport, serviceType)
 		}
 
