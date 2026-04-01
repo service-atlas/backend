@@ -88,7 +88,7 @@ func TestNeo4jReportRepository_GetServicesByTeam_ReturnsServices(t *testing.T) {
 	if !ok {
 		t.Fatalf("service with id %s not found in result", svc1ID)
 	}
-	if s1.Name != "svc-1" || s1.Description != "first" || s1.ServiceType != "api" || s1.Url != "https://svc-1" {
+	if s1.Name != "svc-1" || s1.Description != "first" || s1.ServiceType != "Api" || s1.Url != "https://svc-1" {
 		t.Errorf("svc1 fields not mapped correctly: %+v", s1)
 	}
 	// svc2
@@ -96,7 +96,7 @@ func TestNeo4jReportRepository_GetServicesByTeam_ReturnsServices(t *testing.T) {
 	if !ok {
 		t.Fatalf("service with id %s not found in result", svc2ID)
 	}
-	if s2.Name != "svc-2" || s2.Description != "second" || s2.ServiceType != "worker" || s2.Url != "https://svc-2" {
+	if s2.Name != "svc-2" || s2.Description != "second" || s2.ServiceType != "Worker" || s2.Url != "https://svc-2" {
 		t.Errorf("svc2 fields not mapped correctly: %+v", s2)
 	}
 }

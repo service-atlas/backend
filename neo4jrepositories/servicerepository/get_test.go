@@ -51,7 +51,7 @@ func TestNeo4jServiceRepository_GetServiceById_Success(t *testing.T) {
 	if svc.Id != createdID {
 		t.Fatalf("expected id %s, got %s", createdID, svc.Id)
 	}
-	if svc.Name != "svc-get" || svc.Description != "desc" || svc.ServiceType != "worker" || svc.Url != "https://svc-get" || svc.Tier != 1 {
+	if svc.Name != "svc-get" || svc.Description != "desc" || svc.ServiceType != "Worker" || svc.Url != "https://svc-get" || svc.Tier != 1 {
 		t.Fatalf("fields not mapped correctly: %+v", svc)
 	}
 }

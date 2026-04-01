@@ -87,7 +87,7 @@ func TestNeo4jReportRepository_GetServicesByTier_ReturnsServices(t *testing.T) {
 
 	// Validate fields for each returned service
 	if s2, ok := byID[svc2ID]; ok {
-		if s2.Name != "svc-tier-2-a" || s2.Description != "tier2-a" || s2.ServiceType != "worker" || s2.Url != "https://svc-tier-2-a" || s2.Tier != 2 {
+		if s2.Name != "svc-tier-2-a" || s2.Description != "tier2-a" || s2.ServiceType != "Worker" || s2.Url != "https://svc-tier-2-a" || s2.Tier != 2 {
 			t.Errorf("svc2 fields not mapped correctly: %+v", s2)
 		}
 	} else {
@@ -95,7 +95,7 @@ func TestNeo4jReportRepository_GetServicesByTier_ReturnsServices(t *testing.T) {
 	}
 
 	if s3, ok := byID[svc3ID]; ok {
-		if s3.Name != "svc-tier-2-b" || s3.Description != "tier2-b" || s3.ServiceType != "api" || s3.Url != "https://svc-tier-2-b" || s3.Tier != 2 {
+		if s3.Name != "svc-tier-2-b" || s3.Description != "tier2-b" || s3.ServiceType != "Api" || s3.Url != "https://svc-tier-2-b" || s3.Tier != 2 {
 			t.Errorf("svc3 fields not mapped correctly: %+v", s3)
 		}
 	} else {
