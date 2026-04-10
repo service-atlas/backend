@@ -3,6 +3,7 @@ package dependencyrepository
 import (
 	"context"
 	"fmt"
+	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 
@@ -38,32 +39,29 @@ func (d *Neo4jDependencyRepository) AddDependency(ctx context.Context, id string
 		}
 
 		// Create the dependency relationship
-		var query string
-		var params map[string]any
+		query := `
+			MATCH (s1:Service {id: $serviceId})
+			MATCH (s2:Service {id: $dependencyId})
+			MERGE (s1)-[r:DEPENDS_ON]->(s2)
+			SET r.interaction_type = $interactionType
+			WITH r, 
+				 CASE WHEN $version IS NOT NULL AND $version <> "" 
+					  THEN $version 
+					  ELSE r.version 
+				 END AS resolvedVersion
+			SET r.version = resolvedVersion
+			RETURN r
+		`
+		interactionType := "data"
+		if internal.DependencyType.IsMember(dependency.InteractionType) {
+			interactionType = dependency.InteractionType
+		}
 
-		if dependency.Version != "" {
-			query = `
-				MATCH (s1:Service {id: $serviceId})
-				MATCH (s2:Service {id: $dependencyId})
-				MERGE (s1)-[r:DEPENDS_ON {version: $version}]->(s2)
-				RETURN r
-			`
-			params = map[string]any{
-				"serviceId":    id,
-				"dependencyId": dependency.Id,
-				"version":      dependency.Version,
-			}
-		} else {
-			query = `
-				MATCH (s1:Service {id: $serviceId})
-				MATCH (s2:Service {id: $dependencyId})
-				MERGE (s1)-[r:DEPENDS_ON]->(s2)
-				RETURN r
-			`
-			params = map[string]any{
-				"serviceId":    id,
-				"dependencyId": dependency.Id,
-			}
+		params := map[string]any{
+			"serviceId":       id,
+			"dependencyId":    dependency.Id,
+			"version":         dependency.Version,
+			"interactionType": interactionType,
 		}
 
 		_, err = tx.Run(ctx, query, params)
