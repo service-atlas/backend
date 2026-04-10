@@ -53,7 +53,7 @@ func (d *Neo4jDependencyRepository) AddDependency(ctx context.Context, id string
 			RETURN r
 		`
 		interactionType := "data"
-		if internal.DependencyType.IsMember(dependency.InteractionType) {
+		if internal.InteractionType.IsMember(dependency.InteractionType) {
 			interactionType = dependency.InteractionType
 		}
 

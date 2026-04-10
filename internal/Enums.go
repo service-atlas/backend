@@ -44,6 +44,6 @@ var ArchitectureRole = StringEnum{
 	members: []string{"entrypoint", "application", "infrastructure", "data"},
 }
 
-var DependencyType = StringEnum{
+var InteractionType = StringEnum{
 	members: []string{"data", "security", "performance", "async", "config"},
 }
