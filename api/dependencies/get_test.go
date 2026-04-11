@@ -242,6 +242,119 @@ func TestGetDependenciesWithEmptyInteractionType(t *testing.T) {
 	}
 }
 
+func TestGetDependenciesNoDataReturnsEmptyArray(t *testing.T) {
+	// Create a handler with no dependencies
+	handler := ServiceCallsHandler{
+		Repository: mockDependencyRepository{
+			Data: func() []map[string]any {
+				return []map[string]any{}
+			},
+			Err: nil, // No error
+		},
+	}
+
+	// Create a request
+	req, err := http.NewRequest("GET", "/services/be00abbc-42c6-47aa-a45a-e4e02cb6363f/dependencies", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	req.SetPathValue("id", "be00abbc-42c6-47aa-a45a-e4e02cb6363f")
+	// Create a response recorder
+	rw := httptest.NewRecorder()
+
+	// Call the handler
+	handler.GetDependencies(rw, req)
+
+	// Check the response
+	if rw.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, rw.Code)
+	}
+
+	// Check the body for an empty array, not null
+	body := rw.Body.String()
+	if body != "[]\n" {
+		t.Errorf("Expected empty array [], got %q", body)
+	}
+}
+
+func TestGetDependenciesByInteractionTypeNoDataReturnsEmptyArray(t *testing.T) {
+	// Create a handler with dependencies of other types, but not 'security'
+	mockDeps := []map[string]any{
+		{
+			"id":               "dependency-id-1",
+			"name":             "Dependency 1",
+			"interaction_type": "data",
+		},
+	}
+
+	handler := ServiceCallsHandler{
+		Repository: mockDependencyRepository{
+			Data: func() []map[string]any {
+				return mockDeps
+			},
+			Err: nil, // No error
+		},
+	}
+
+	// Create a request with interaction_type=security (which won't have results)
+	req, err := http.NewRequest("GET", "/services/be00abbc-42c6-47aa-a45a-e4e02cb6363f/dependencies?interaction_type=security", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	req.SetPathValue("id", "be00abbc-42c6-47aa-a45a-e4e02cb6363f")
+	// Create a response recorder
+	rw := httptest.NewRecorder()
+
+	// Call the handler
+	handler.GetDependencies(rw, req)
+
+	// Check the response
+	if rw.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, rw.Code)
+	}
+
+	// Check the body for an empty array, not null
+	body := rw.Body.String()
+	if body != "[]\n" {
+		t.Errorf("Expected empty array [], got %q", body)
+	}
+}
+
+func TestGetDependentsNoDataReturnsEmptyArray(t *testing.T) {
+	// Create a handler with no dependents
+	handler := ServiceCallsHandler{
+		Repository: mockDependencyRepository{
+			Data: func() []map[string]any {
+				return []map[string]any{}
+			},
+			Err: nil, // No error
+		},
+	}
+
+	// Create a request
+	req, err := http.NewRequest("GET", "/services/be00abbc-42c6-47aa-a45a-e4e02cb6363f/dependents", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	req.SetPathValue("id", "be00abbc-42c6-47aa-a45a-e4e02cb6363f")
+	// Create a response recorder
+	rw := httptest.NewRecorder()
+
+	// Call the handler
+	handler.GetDependents(rw, req)
+
+	// Check the response
+	if rw.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, rw.Code)
+	}
+
+	// Check the body for an empty array, not null
+	body := rw.Body.String()
+	if body != "[]\n" {
+		t.Errorf("Expected empty array [], got %q", body)
+	}
+}
+
 func TestGetByIdInvalidPath(t *testing.T) {
 	// Create a handler with mocked dependencies
 	handler := ServiceCallsHandler{
