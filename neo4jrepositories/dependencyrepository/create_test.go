@@ -52,7 +52,7 @@ func TestNeo4jDependencyRepository_AddDependency_WithVersion(t *testing.T) {
 	}
 
 	// Act
-	dep := repositories.Dependency{Id: depID, Version: "1.2.3"}
+	dep := repositories.Dependency{Id: depID, Version: "1.2.3", InteractionType: "data"}
 	if err := repo.AddDependency(ctx, serviceID, dep); err != nil {
 		t.Fatalf("AddDependency returned error: %v", err)
 	}

@@ -3,7 +3,6 @@ package dependencyrepository
 import (
 	"context"
 	"fmt"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 
@@ -52,16 +51,12 @@ func (d *Neo4jDependencyRepository) AddDependency(ctx context.Context, id string
 			SET r.version = resolvedVersion
 			RETURN r
 		`
-		interactionType := "data"
-		if internal.InteractionType.IsMember(dependency.InteractionType) {
-			interactionType = dependency.InteractionType
-		}
 
 		params := map[string]any{
 			"serviceId":       id,
 			"dependencyId":    dependency.Id,
 			"version":         dependency.Version,
-			"interactionType": interactionType,
+			"interactionType": dependency.InteractionType,
 		}
 
 		_, err = tx.Run(ctx, query, params)
