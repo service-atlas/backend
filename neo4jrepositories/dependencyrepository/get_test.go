@@ -47,7 +47,7 @@ func TestNeo4jDependencyRepository_GetDependencies_Success(t *testing.T) {
 	if _, err = write.Run(ctx, "CREATE (s:Service {id: $id, name: 'svc-3', type: 'queue'}) RETURN s", map[string]any{"id": s3}); err != nil {
 		t.Fatalf("create s3: %v", err)
 	}
-	if _, err = write.Run(ctx, "MATCH (a:Service {id: $a}),(b:Service {id: $b}) MERGE (a)-[:DEPENDS_ON {version: '2.0.0', interaction_type: 'event'}]->(b)", map[string]any{"a": s1, "b": s2}); err != nil {
+	if _, err = write.Run(ctx, "MATCH (a:Service {id: $a}),(b:Service {id: $b}) MERGE (a)-[:DEPENDS_ON {version: '2.0.0', interaction_type: 'security'}]->(b)", map[string]any{"a": s1, "b": s2}); err != nil {
 		t.Fatalf("rel s1->s2: %v", err)
 	}
 	if _, err = write.Run(ctx, "MATCH (a:Service {id: $a}),(b:Service {id: $b}) MERGE (a)-[:DEPENDS_ON]->(b)", map[string]any{"a": s1, "b": s3}); err != nil {
@@ -72,8 +72,8 @@ func TestNeo4jDependencyRepository_GetDependencies_Success(t *testing.T) {
 			if d.Version != "2.0.0" {
 				t.Fatalf("expected version 2.0.0 for %s, got %q", s2, d.Version)
 			}
-			if d.InteractionType != "event" {
-				t.Fatalf("expected interaction_type 'event' for %s, got %q", s2, d.InteractionType)
+			if d.InteractionType != "security" {
+				t.Fatalf("expected interaction_type 'security' for %s, got %q", s2, d.InteractionType)
 			}
 			if d.Name == "" || d.ServiceType == "" {
 				t.Fatalf("expected name and type for %s", s2)
