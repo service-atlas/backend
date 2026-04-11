@@ -89,13 +89,67 @@ This application supports the recording and tracking of categorized technical de
 I think adding technical debt (or code rot) is a useful way to track and quantify issues with services. Things that are in your work tracking software (Jira, etc.)
 may or may not always be picked up in a reasonable timeframe and may not be easily associated with the service in question.
 
+## Dependency Interaction Types
+
+### Summary
+Enriching `DEPENDS_ON` with interaction type classification to surface logical data flows and engineering intent. Rather than introducing a separate relationship type to distinguish logical data flows from operational dependencies, interaction types enrich the existing dependency graph with a classification that describes *why* one service depends on another.
+
+### Classification Types
+
+| Type | Default | Description |
+|---|---|---|
+| `data` | Yes | A direct, synchronous exchange of meaningful domain data between two services. Represents logical data flow. |
+| `security` | No | A dependency on a service that handles authentication, authorisation, or request routing (e.g. Auth Service, Reverse Proxy). |
+| `performance` | No | A dependency on a service that exists to optimise speed or reduce load (e.g. Redis cache, Elasticsearch). |
+| `async` | No | A dependency where the interaction is fire-and-forget or event-driven (e.g. RabbitMQ, Kafka). |
+| `config` | No | A dependency on a service that provides configuration, feature flags, or secrets at runtime (e.g. Vault, Feature flag service). |
+
+### Scope
+- New `interaction_type` field on the `DEPENDS_ON` relationship
+- Validation of allowed interaction types
+- Default behavior for existing relationships: if unset, treat as `data`
+- API support for filtering dependencies by `interaction_type`
+
+## Service Tiers (Criticality Classification)
+
+### Summary
+Service Tiers introduce a `tier` attribute on `Service` to represent how critical a component is to the overall operation of the platform. This helps reason about impact, prioritize work, and understand dependency risk across the system.
+
+### Tier Model
+Use 4 tiers, where Tier 1 is the most critical.
+
+- Tier 1 — Mission Critical
+  - Core to the platform’s primary purpose
+  - Outage results in total or near-total platform failure
+  - High customer, revenue, or availability impact
+- Tier 2 — Business Critical
+  - Platform remains partially functional if down
+  - Significant degradation of key features or workflows
+  - High user impact, but not a full outage
+- Tier 3 — Supporting
+  - Enhances or supports core functionality
+  - Failures are noticeable but tolerable short-term
+  - Often asynchronous or auxiliary services
+- Tier 4 — Non-Critical / Auxiliary
+  - Minimal operational impact if unavailable
+  - Internal tools, dashboards, or experimental components
+
+### Scope
+- New `tier` field on the Service model
+- Validation of allowed tier values (1–4)
+- Default behavior for existing services: if unset, treat as Tier 3
+- API support for creating, updating, and querying services by `tier`
+
+
 ## Neo4j Data Structure
 Services are created under a `Service` object, while releases are created under a `Release` object.
-Services can have a `Depend_ON` relationship that may have a version as part of the relationship
-Services `Released` a `Release`
+Services can have a `DEPENDS_ON` relationship that may have a `version` and an `interaction_type` as part of the relationship.
+Services `RELEASED` a `Release`
 Services `OWNS` a `Debt`
 
 Services also include a `tier` property to indicate operational criticality, validated to be an integer from 1 (most critical) to 4 (least critical). If not set, it defaults to Tier 3 (Supporting) behavior.
+
+`DEPENDS_ON` relationships include an `interaction_type` property to classify the nature of the dependency (defaulting to `data`).
 
 Releases will always have a date; releases without a date are assigned `now()` as the date. Releases may have an associated url, a version, or both, but require at least the url or a version to be present.
 
@@ -168,48 +222,5 @@ Notes:
 
 ## API Endpoints
 
-For more information on endpoints, see the [Bruno Collection](./HTTP_COLLECTION)
-
-## ChangeLog
-### V1.4.0
-_Date: 2025-12-19_
-- Introduces Service Tiers (criticality classification) with `tier` field on Service (allowed values 1–4)
-- Validates tier values and returns `tier` in API responses
-- Supports creating, updating, and querying services by `tier`
-- Defaults existing/unspecified services to Tier 3 behavior
-
-### V1.2.0
-_Date: 2025-11-09_
-- Refactors to use Chi http routing library
-- Adds support for associating teams to services
-- Adds test container tests to neo4j repositories
-
-## Service Tiers (Criticality Classification)
-
-### Summary
-Service Tiers introduce a `tier` attribute on `Service` to represent how critical a component is to the overall operation of the platform. This helps reason about impact, prioritize work, and understand dependency risk across the system.
-
-### Tier Model
-Use 4 tiers, where Tier 1 is the most critical.
-
-- Tier 1 — Mission Critical
-  - Core to the platform’s primary purpose
-  - Outage results in total or near-total platform failure
-  - High customer, revenue, or availability impact
-- Tier 2 — Business Critical
-  - Platform remains partially functional if down
-  - Significant degradation of key features or workflows
-  - High user impact, but not a full outage
-- Tier 3 — Supporting
-  - Enhances or supports core functionality
-  - Failures are noticeable but tolerable short-term
-  - Often asynchronous or auxiliary services
-- Tier 4 — Non-Critical / Auxiliary
-  - Minimal operational impact if unavailable
-  - Internal tools, dashboards, or experimental components
-
-### Scope
-- New `tier` field on the Service model
-- Validation of allowed tier values (1–4)
-- Default behavior for existing services: if unset, treat as Tier 3
-- API support for creating, updating, and querying services by `tier`
+For more information on endpoints, see the [Bruno Collection](./HTTP_COLLECTION).
+Detailed discussions and RFCs can be found on GitHub, for example: [RFC: Dependency Interaction Types](https://github.com/service-atlas/backend/discussions/178).
