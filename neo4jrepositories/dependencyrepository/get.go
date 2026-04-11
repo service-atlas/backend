@@ -116,10 +116,7 @@ func makeGetTransaction(ctx context.Context, query string, parameters map[string
 			id, _ := record.Get("id")
 			name, _ := record.Get("name")
 			version, _ := record.Get("version")
-			interactionType, ok := record.Get("interaction_type")
-			if !ok {
-				return nil, fmt.Errorf("interaction_type not found")
-			}
+			interactionType, _ := record.Get("interaction_type")
 			serviceType, _ := record.Get("type")
 			dependency := &repositories.Dependency{
 				Id: id.(string),
