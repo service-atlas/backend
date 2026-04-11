@@ -39,6 +39,8 @@ type DependencyRepository interface {
 	AddDependency(ctx context.Context, id string, dependency Dependency) error
 	// GetDependencies retrieves all dependencies of a resource.
 	GetDependencies(ctx context.Context, id string) ([]*Dependency, error)
+	// GetDependenciesByInteractionType retrieves all dependencies of a resource of a specific interaction type.
+	GetDependenciesByInteractionType(ctx context.Context, id, interaction_type string) ([]*Dependency, error)
 	// GetDependents retrieves all resources that depend on a given resource.
 	GetDependents(ctx context.Context, id string) ([]*Dependency, error)
 	// DeleteDependency deletes a dependency between two resources.
