@@ -16,7 +16,23 @@ func (s *ServiceCallsHandler) GetDependencies(rw http.ResponseWriter, req *http.
 		http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	dep, err := s.Repository.GetDependencies(req.Context(), id)
+	interaction_type := req.URL.Query().Get("interaction_type")
+	if !internal.InteractionType.IsMember(interaction_type) && interaction_type != "" {
+		http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	logger := internal.LoggerFromContext(req.Context())
+	logger.Debug("Getting dependencies",
+		slog.String("service_id", id),
+		slog.String("interaction_type", interaction_type),
+	)
+	var dep []*repositories.Dependency
+	var err error
+	if interaction_type != "" {
+		dep, err = s.Repository.GetDependenciesByInteractionType(req.Context(), id, interaction_type)
+	} else {
+		dep, err = s.Repository.GetDependencies(req.Context(), id)
+	}
 	if err != nil {
 		customerrors.HandleError(rw, err)
 		return
