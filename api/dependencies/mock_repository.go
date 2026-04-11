@@ -52,6 +52,50 @@ func (repo mockDependencyRepository) GetDependencies(_ context.Context, _ string
 	return dependencies, nil
 }
 
+func (repo mockDependencyRepository) GetDependenciesByInteractionType(_ context.Context, _, interaction_type string) ([]*repositories.Dependency, error) {
+	if repo.Err != nil {
+		return nil, repo.Err
+	}
+
+	// Convert the mock data to the expected return type
+	data := repo.Data()
+	dependencies := make([]*repositories.Dependency, 0, len(data))
+
+	for _, item := range data {
+		// Filter by interaction type if provided
+		if interaction_type != "" {
+			if itemInteractionType, ok := item["interaction_type"].(string); ok {
+				if itemInteractionType != interaction_type {
+					continue
+				}
+			} else {
+				// If item doesn't have interaction_type, and we are filtering, skip it
+				// unless we assume a default. But for mock, let's be explicit.
+				continue
+			}
+		}
+
+		dep := &repositories.Dependency{}
+
+		if id, ok := item["id"].(string); ok {
+			dep.Id = id
+		}
+		if name, ok := item["name"].(string); ok {
+			dep.Name = name
+		}
+		if version, ok := item["version"].(string); ok {
+			dep.Version = version
+		}
+		if it, ok := item["interaction_type"].(string); ok {
+			dep.InteractionType = it
+		}
+
+		dependencies = append(dependencies, dep)
+	}
+
+	return dependencies, nil
+}
+
 func (repo mockDependencyRepository) GetDependents(_ context.Context, _ string) ([]*repositories.Dependency, error) {
 	if repo.Err != nil {
 		return nil, repo.Err

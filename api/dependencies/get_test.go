@@ -84,6 +84,164 @@ func TestGetByIdSuccess(t *testing.T) {
 	}
 }
 
+func TestGetDependenciesByInteractionTypeSuccess(t *testing.T) {
+	// Create mock dependencies with different interaction types
+	mockDeps := []map[string]any{
+		{
+			"id":               "dependency-id-1",
+			"name":             "Dependency 1",
+			"version":          "1.0.0",
+			"interaction_type": "security",
+		},
+		{
+			"id":               "dependency-id-2",
+			"name":             "Dependency 2",
+			"version":          "2.0.0",
+			"interaction_type": "data",
+		},
+		{
+			"id":               "dependency-id-3",
+			"name":             "Dependency 3",
+			"version":          "1.1.0",
+			"interaction_type": "security",
+		},
+	}
+
+	// Create a handler with mocked dependencies
+	handler := ServiceCallsHandler{
+		Repository: mockDependencyRepository{
+			Data: func() []map[string]any {
+				return mockDeps
+			},
+			Err: nil, // No error
+		},
+	}
+
+	// Create a request with interaction_type filter
+	req, err := http.NewRequest("GET", "/services/be00abbc-42c6-47aa-a45a-e4e02cb6363f/dependencies?interaction_type=security", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	req.SetPathValue("id", "be00abbc-42c6-47aa-a45a-e4e02cb6363f")
+
+	// Create a response recorder
+	rw := httptest.NewRecorder()
+
+	// Call the handler
+	handler.GetDependencies(rw, req)
+
+	// Check the response
+	if rw.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, rw.Code)
+	}
+
+	// Check the content type
+	contentType := rw.Header().Get("Content-Type")
+	if contentType != "application/json" {
+		t.Errorf("Expected Content-Type %s, got %s", "application/json", contentType)
+	}
+
+	// Decode the response
+	var dependencies []*repositories.Dependency
+	err = json.NewDecoder(rw.Body).Decode(&dependencies)
+	if err != nil {
+		t.Fatalf("Failed to decode response: %v", err)
+	}
+
+	// Check that only dependencies with interaction_type 'security' are returned
+	expectedCount := 2 // There are 2 dependencies with interaction_type 'security'
+	if len(dependencies) != expectedCount {
+		t.Errorf("Expected %d dependencies, got %d", expectedCount, len(dependencies))
+	}
+
+	// Check that all returned dependencies have the correct interaction_type
+	for _, dep := range dependencies {
+		if dep.InteractionType != "security" {
+			t.Errorf("Expected interaction_type %s, got %s", "security", dep.InteractionType)
+		}
+	}
+}
+
+func TestGetDependenciesByInteractionTypeInvalid(t *testing.T) {
+	// Create a handler
+	handler := ServiceCallsHandler{
+		Repository: mockDependencyRepository{
+			Data: func() []map[string]any {
+				return []map[string]any{}
+			},
+			Err: nil,
+		},
+	}
+
+	// Create a request with an invalid interaction_type
+	req, err := http.NewRequest("GET", "/services/be00abbc-42c6-47aa-a45a-e4e02cb6363f/dependencies?interaction_type=invalid_type", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	req.SetPathValue("id", "be00abbc-42c6-47aa-a45a-e4e02cb6363f")
+
+	// Create a response recorder
+	rw := httptest.NewRecorder()
+
+	// Call the handler
+	handler.GetDependencies(rw, req)
+
+	// Check the response
+	if rw.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, rw.Code)
+	}
+}
+
+func TestGetDependenciesWithEmptyInteractionType(t *testing.T) {
+	// Create mock dependencies
+	mockDeps := []map[string]any{
+		{
+			"id":               "dependency-id-1",
+			"name":             "Dependency 1",
+			"interaction_type": "security",
+		},
+	}
+
+	// Create a handler
+	handler := ServiceCallsHandler{
+		Repository: mockDependencyRepository{
+			Data: func() []map[string]any {
+				return mockDeps
+			},
+			Err: nil,
+		},
+	}
+
+	// Create a request with an empty interaction_type
+	req, err := http.NewRequest("GET", "/services/be00abbc-42c6-47aa-a45a-e4e02cb6363f/dependencies?interaction_type=", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	req.SetPathValue("id", "be00abbc-42c6-47aa-a45a-e4e02cb6363f")
+
+	// Create a response recorder
+	rw := httptest.NewRecorder()
+
+	// Call the handler
+	handler.GetDependencies(rw, req)
+
+	// Check the response
+	if rw.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, rw.Code)
+	}
+
+	// Decode the response
+	var dependencies []*repositories.Dependency
+	err = json.NewDecoder(rw.Body).Decode(&dependencies)
+	if err != nil {
+		t.Fatalf("Failed to decode response: %v", err)
+	}
+
+	if len(dependencies) != 1 {
+		t.Errorf("Expected 1 dependency, got %d", len(dependencies))
+	}
+}
+
 func TestGetByIdInvalidPath(t *testing.T) {
 	// Create a handler with mocked dependencies
 	handler := ServiceCallsHandler{
