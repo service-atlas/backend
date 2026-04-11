@@ -97,6 +97,118 @@ func TestNeo4jDependencyRepository_GetDependencies_Success(t *testing.T) {
 	}
 }
 
+func TestNeo4jDependencyRepository_GetDependenciesByInteractionType_Success(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	ctx := context.Background()
+
+	// Start Neo4j test container
+	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = tc.Container.Terminate(ctx) })
+
+	// Connect driver
+	driver, err := neo4j.NewDriverWithContext(tc.Endpoint, neo4j.BasicAuth("neo4j", "letmein!", ""))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = driver.Close(ctx) }()
+
+	repo := New(driver)
+
+	// Arrange: s1 depends on s2 (interaction_type: security) and s3 (interaction_type: data)
+	s1 := "55555555-5555-5555-5555-555555555555"
+	s2 := "66666666-6666-6666-6666-666666666666"
+	s3 := "77777777-7777-7777-7777-777777777777"
+	write := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer func() { _ = write.Close(ctx) }()
+	if _, err = write.Run(ctx, "CREATE (s:Service {id: $id, name: 'svc-1', type: 'api'}) RETURN s", map[string]any{"id": s1}); err != nil {
+		t.Fatalf("create s1: %v", err)
+	}
+	if _, err = write.Run(ctx, "CREATE (s:Service {id: $id, name: 'svc-2', type: 'db'}) RETURN s", map[string]any{"id": s2}); err != nil {
+		t.Fatalf("create s2: %v", err)
+	}
+	if _, err = write.Run(ctx, "CREATE (s:Service {id: $id, name: 'svc-3', type: 'queue'}) RETURN s", map[string]any{"id": s3}); err != nil {
+		t.Fatalf("create s3: %v", err)
+	}
+	if _, err = write.Run(ctx, "MATCH (a:Service {id: $a}),(b:Service {id: $b}) MERGE (a)-[:DEPENDS_ON {version: '2.0.0', interaction_type: 'security'}]->(b)", map[string]any{"a": s1, "b": s2}); err != nil {
+		t.Fatalf("rel s1->s2: %v", err)
+	}
+	if _, err = write.Run(ctx, "MATCH (a:Service {id: $a}),(b:Service {id: $b}) MERGE (a)-[:DEPENDS_ON {interaction_type: 'data'}]->(b)", map[string]any{"a": s1, "b": s3}); err != nil {
+		t.Fatalf("rel s1->s3: %v", err)
+	}
+
+	// Act: Get only 'security' dependencies
+	deps, err := repo.GetDependenciesByInteractionType(ctx, s1, "security")
+	if err != nil {
+		t.Fatalf("GetDependenciesByInteractionType returned error: %v", err)
+	}
+
+	// Assert
+	if len(deps) != 1 {
+		t.Fatalf("expected 1 dependency, got %d", len(deps))
+	}
+	if deps[0].Id != s2 {
+		t.Fatalf("expected dependency ID %s, got %s", s2, deps[0].Id)
+	}
+	if deps[0].InteractionType != "security" {
+		t.Fatalf("expected interaction_type 'security', got %q", deps[0].InteractionType)
+	}
+
+	// Act: Get only 'data' dependencies
+	deps, err = repo.GetDependenciesByInteractionType(ctx, s1, "data")
+	if err != nil {
+		t.Fatalf("GetDependenciesByInteractionType returned error: %v", err)
+	}
+
+	// Assert
+	if len(deps) != 1 {
+		t.Fatalf("expected 1 dependency, got %d", len(deps))
+	}
+	if deps[0].Id != s3 {
+		t.Fatalf("expected dependency ID %s, got %s", s3, deps[0].Id)
+	}
+	if deps[0].InteractionType != "data" {
+		t.Fatalf("expected interaction_type 'data', got %q", deps[0].InteractionType)
+	}
+}
+
+func TestNeo4jDependencyRepository_GetDependenciesByInteractionType_NotFound(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	ctx := context.Background()
+
+	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = tc.Container.Terminate(ctx) })
+
+	driver, err := neo4j.NewDriverWithContext(tc.Endpoint, neo4j.BasicAuth("neo4j", "letmein!", ""))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = driver.Close(ctx) }()
+
+	repo := New(driver)
+
+	_, err = repo.GetDependenciesByInteractionType(ctx, "00000000-0000-0000-0000-000000000000", "security")
+	if err == nil {
+		t.Fatalf("expected error when service not found")
+	}
+	if pathErr, ok := errors.AsType[*customerrors.HTTPError](err); ok {
+		if pathErr.Status != 404 {
+			t.Fatalf("expected HTTP 404, got %d", pathErr.Status)
+		}
+	} else {
+		t.Fatalf("expected *customerrors.HTTPError, got %T: %v", err, err)
+	}
+}
+
 func TestNeo4jDependencyRepository_GetDependencies_NotFound(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
