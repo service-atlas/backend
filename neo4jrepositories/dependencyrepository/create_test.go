@@ -52,16 +52,16 @@ func TestNeo4jDependencyRepository_AddDependency_WithVersion(t *testing.T) {
 	}
 
 	// Act
-	dep := repositories.Dependency{Id: depID, Version: "1.2.3"}
+	dep := repositories.Dependency{Id: depID, Version: "1.2.3", InteractionType: "data"}
 	if err := repo.AddDependency(ctx, serviceID, dep); err != nil {
 		t.Fatalf("AddDependency returned error: %v", err)
 	}
 
-	// Assert: relationship exists with version
+	// Assert: relationship exists with version and interaction_type
 	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer func() { _ = read.Close(ctx) }()
 	res, err := read.Run(ctx,
-		"MATCH (:Service {id: $sid})-[r:DEPENDS_ON]->(:Service {id: $did}) RETURN r.version AS version",
+		"MATCH (:Service {id: $sid})-[r:DEPENDS_ON]->(:Service {id: $did}) RETURN r.version AS version, r.interaction_type AS it",
 		map[string]any{"sid": serviceID, "did": depID},
 	)
 	if err != nil {
@@ -77,6 +77,82 @@ func TestNeo4jDependencyRepository_AddDependency_WithVersion(t *testing.T) {
 	}
 	if ver != "1.2.3" {
 		t.Fatalf("expected version %q, got %#v", "1.2.3", ver)
+	}
+	it, ok := rec.Get("it")
+	if !ok {
+		t.Fatalf("missing interaction_type property")
+	}
+	if it != "data" {
+		t.Fatalf("expected interaction_type %q, got %#v", "data", it)
+	}
+}
+
+func TestNeo4jDependencyRepository_AddDependency_WithInteractionType(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	ctx := context.Background()
+
+	// Start Neo4j test container
+	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = tc.Container.Terminate(ctx) })
+
+	// Connect driver
+	driver, err := neo4j.NewDriverWithContext(tc.Endpoint, neo4j.BasicAuth("neo4j", "letmein!", ""))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = driver.Close(ctx) }()
+
+	repo := New(driver)
+
+	// Arrange: create two services
+	serviceID := "11111111-1111-1111-1111-111111111111"
+	depID := "22222222-2222-2222-2222-222222222222"
+	write := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer func() { _ = write.Close(ctx) }()
+	if _, err = write.Run(ctx,
+		"CREATE (s1:Service {id: $sid, name: $sname}) RETURN s1",
+		map[string]any{"sid": serviceID, "sname": "svc-a"},
+	); err != nil {
+		t.Fatalf("failed to create service1: %v", err)
+	}
+	if _, err = write.Run(ctx,
+		"CREATE (s2:Service {id: $did, name: $dname}) RETURN s2",
+		map[string]any{"did": depID, "dname": "svc-b"},
+	); err != nil {
+		t.Fatalf("failed to create service2: %v", err)
+	}
+
+	// Act
+	dep := repositories.Dependency{Id: depID, InteractionType: "async"}
+	if err := repo.AddDependency(ctx, serviceID, dep); err != nil {
+		t.Fatalf("AddDependency returned error: %v", err)
+	}
+
+	// Assert: relationship exists with interaction_type
+	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer func() { _ = read.Close(ctx) }()
+	res, err := read.Run(ctx,
+		"MATCH (:Service {id: $sid})-[r:DEPENDS_ON]->(:Service {id: $did}) RETURN r.interaction_type AS it",
+		map[string]any{"sid": serviceID, "did": depID},
+	)
+	if err != nil {
+		t.Fatalf("failed to verify dependency: %v", err)
+	}
+	rec, err := res.Single(ctx)
+	if err != nil {
+		t.Fatalf("expected single record verifying dependency: %v", err)
+	}
+	it, ok := rec.Get("it")
+	if !ok {
+		t.Fatalf("missing interaction_type property")
+	}
+	if it != "async" {
+		t.Fatalf("expected interaction_type %q, got %#v", "async", it)
 	}
 }
 

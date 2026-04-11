@@ -4,7 +4,8 @@ import "testing"
 
 func TestDependency_ValidateSuccess(t *testing.T) {
 	dep := Dependency{
-		Id: "test",
+		Id:              "test",
+		InteractionType: "config",
 	}
 	err := dep.Validate()
 	if err != nil {
@@ -24,4 +25,15 @@ func TestDependency_ValidateFailNoId(t *testing.T) {
 		}
 	}
 
+}
+
+func TestDependency_ValidateFailInvalidInteractionType(t *testing.T) {
+	dep := Dependency{
+		Id:              "test",
+		InteractionType: "invalid",
+	}
+	err := dep.Validate()
+	if err == nil {
+		t.Error("Expected error")
+	}
 }

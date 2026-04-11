@@ -13,7 +13,7 @@ func (d *Neo4jDependencyRepository) GetDependencies(ctx context.Context, id stri
 
 	query := `
 			MATCH (s1:Service {id: $serviceId})-[r:DEPENDS_ON]->(s2:Service)
-			RETURN s2.id as id, s2.name as name, r.version as version, s2.type as type
+			RETURN s2.id as id, s2.name as name, r.version as version, s2.type as type, r.interaction_type as interaction_type
 		`
 	result, err := d.manager.ExecuteRead(ctx, makeGetTransaction(ctx, id, query))
 	if err != nil {
@@ -26,7 +26,7 @@ func (d *Neo4jDependencyRepository) GetDependencies(ctx context.Context, id stri
 func (d *Neo4jDependencyRepository) GetDependents(ctx context.Context, id string) ([]*repositories.Dependency, error) {
 	query := `
 			MATCH (s1:Service)-[r:DEPENDS_ON]->(s2:Service {id: $serviceId})
-			RETURN s1.id as id, s1.name as name, s1.type as type, r.version as version
+			RETURN s1.id as id, s1.name as name, s1.type as type, r.version as version, r.interaction_type as interaction_type
 		`
 	result, err := d.manager.ExecuteRead(ctx, makeGetTransaction(ctx, id, query))
 	if err != nil {
@@ -80,6 +80,10 @@ func makeGetTransaction(ctx context.Context, id string, query string) func(tx ne
 			id, _ := record.Get("id")
 			name, _ := record.Get("name")
 			version, _ := record.Get("version")
+			interactionType, ok := record.Get("interaction_type")
+			if !ok {
+				return nil, fmt.Errorf("interaction_type not found")
+			}
 			serviceType, _ := record.Get("type")
 			dependency := &repositories.Dependency{
 				Id: id.(string),
@@ -91,6 +95,12 @@ func makeGetTransaction(ctx context.Context, id string, query string) func(tx ne
 			}
 			if version != nil {
 				dependency.Version = version.(string)
+			}
+			if interactionType != nil {
+				dependency.InteractionType = interactionType.(string)
+			}
+			if dependency.InteractionType == "" {
+				dependency.InteractionType = "data"
 			}
 
 			if serviceType != nil {
