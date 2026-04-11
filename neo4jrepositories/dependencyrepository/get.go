@@ -23,7 +23,11 @@ func (d *Neo4jDependencyRepository) GetDependencies(ctx context.Context, id stri
 		return nil, err
 	}
 
-	return result.([]*repositories.Dependency), nil
+	deps := result.([]*repositories.Dependency)
+	if deps == nil {
+		return []*repositories.Dependency{}, nil
+	}
+	return deps, nil
 }
 func (d *Neo4jDependencyRepository) GetDependenciesByInteractionType(ctx context.Context, id, interaction_type string) ([]*repositories.Dependency, error) {
 
@@ -40,7 +44,11 @@ func (d *Neo4jDependencyRepository) GetDependenciesByInteractionType(ctx context
 		return nil, err
 	}
 
-	return result.([]*repositories.Dependency), nil
+	deps := result.([]*repositories.Dependency)
+	if deps == nil {
+		return []*repositories.Dependency{}, nil
+	}
+	return deps, nil
 }
 
 func (d *Neo4jDependencyRepository) GetDependents(ctx context.Context, id string) ([]*repositories.Dependency, error) {
@@ -98,7 +106,7 @@ func makeGetTransaction(ctx context.Context, query string, parameters map[string
 			return nil, err
 		}
 
-		var dependencies []*repositories.Dependency
+		var dependencies = []*repositories.Dependency{}
 		records, err = result.Collect(ctx)
 		if err != nil {
 			return nil, err
