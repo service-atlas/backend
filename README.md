@@ -1,5 +1,5 @@
 # Service Atlas Backend
-![Coverage](https://img.shields.io/badge/Coverage-77.6%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-77.9%25-brightgreen)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/service-atlas/backend?utm_source=oss&utm_medium=github&utm_campaign=service-atlas%2Fbackend&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 A RESTful API service designed to map dependencies between services and provide basic information about services in your ecosystem.
