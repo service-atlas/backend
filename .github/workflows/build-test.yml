@@ -8,24 +8,24 @@ on:
       - ready_for_review
       - reopened
       - opened
-env:
-  HEAD_REF: ${{ github.head_ref }}
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+        name: Checkout
+
       - name: Cache Go modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
 
-      - uses: actions/checkout@v4
-        name: Checkout
 
-      - uses: actions/setup-go@v5.5.0
+
+      - uses: actions/setup-go@v6.4.0
         with:
           go-version: ${{ vars.GO_VERSION }}
 
@@ -39,17 +39,16 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         name: Checkout
         with:
           ref: ${{ github.head_ref }}
 
-      - uses: actions/setup-go@v5.5.0
+      - uses: actions/setup-go@v6.4.0
         with:
           go-version: ${{ vars.GO_VERSION }}
 
       - name: run tests
         shell: bash
         run: |
-          go test --short -v ./... -covermode=count -coverprofile=coverage.out
-          go tool cover -func=coverage.out -o=coverage.out
+          go test --short -v ./...
