@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"service-atlas/api/routes"
 	"service-atlas/internal/config"
+	"service-atlas/internal/secrets"
 	"service-atlas/neo4jrepositories"
 	"strings"
 	"syscall"
@@ -21,9 +22,19 @@ func main() {
 	ctx := context.Background()
 	logger := getLogger()
 	slog.SetDefault(logger)
+	secretsProvider, err := secrets.NewProvider(ctx)
+	if err != nil {
+		slog.Error("Error creating secrets provider: ", slog.Any("error", err))
+		os.Exit(1)
+	}
+	dbInfo, err := secretsProvider.GetDatabaseInfo(ctx)
+	if err != nil {
+		slog.Error("Error getting database info: ", slog.Any("error", err))
+		os.Exit(1)
+	}
 	driver, err := neo4j.NewDriverWithContext(
-		config.GetConfigValue("DB_URL"),
-		neo4j.BasicAuth(config.GetConfigValue("DB_USERNAME"), config.GetConfigValue("DB_PASSWORD"), ""))
+		dbInfo.URL,
+		neo4j.BasicAuth(dbInfo.Username, dbInfo.Password, ""))
 	defer func() {
 		closeErr := driver.Close(ctx)
 		if closeErr != nil {
