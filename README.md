@@ -170,10 +170,12 @@ Releases will always have a date; releases without a date are assigned `now()` a
    ```
 3. Set the required environment variables:
    ```sh
+   export SECRETS_PROVIDER=env
    export DB_URL=neo4j://localhost:7687
    export DB_USERNAME=neo4j
    export DB_PASSWORD=password
    ```
+   *Note: These environment variables use the default `env` secrets provider. See [Configuration](#configuration) for alternative providers.*
 4. Build and run the application:
    ```sh
    go build -o service-atlas ./cmd/service-atlas
@@ -182,11 +184,41 @@ Releases will always have a date; releases without a date are assigned `now()` a
 
 ## Configuration
 
-The application is configured using environment variables:
+The application is configured using environment variables. The primary configuration relates to database connectivity and how secrets are managed.
 
-- `DB_URL`: URL of the Neo4j database (default: none, required)
-- `DB_USERNAME`: Username for Neo4j authentication (default: none, required)
-- `DB_PASSWORD`: Password for Neo4j authentication (default: none, required)
+### Core Settings
+
+- `SECRETS_PROVIDER`: Defines how database credentials are retrieved. Options: `env` (default), `aws`.
+- `LOG_LEVEL`: Controls logging verbosity. Options: `debug`, `info` (default), `warning`, `error`.
+
+### Database Connectivity & Secrets Management
+
+Service Atlas supports multiple "Providers" for retrieving database credentials.
+
+#### Environment Variable Provider (Default)
+
+Used when `SECRETS_PROVIDER` is set to `env` or is unset.
+
+- `DB_URL`: URL of the Neo4j database (e.g., `neo4j://localhost:7687`).
+- `DB_USERNAME`: Username for Neo4j authentication.
+- `DB_PASSWORD`: Password for Neo4j authentication.
+
+#### AWS Secrets Manager Provider
+
+Used when `SECRETS_PROVIDER` is set to `aws`. This provider retrieves a JSON secret from AWS Secrets Manager.
+
+- `DATABASE_SECRET_NAME`: The name or ARN of the secret in AWS Secrets Manager.
+- Standard AWS environment variables (e.g., `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`) must be configured to allow access.
+
+**Expected Secret Format:**
+The AWS secret must be a JSON object with the following keys:
+```json
+{
+  "url": "neo4j://your-neo4j-host:7687",
+  "username": "neo4j",
+  "password": "your-password"
+}
+```
 
 The server listens on port 8080 by default.
 
