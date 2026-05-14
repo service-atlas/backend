@@ -35,17 +35,16 @@ func main() {
 	driver, err := neo4j.NewDriverWithContext(
 		dbInfo.URL,
 		neo4j.BasicAuth(dbInfo.Username, dbInfo.Password, ""))
+	if err != nil {
+		slog.Error("Error creating driver: ", slog.Any("error", err))
+		os.Exit(1)
+	}
 	defer func() {
 		closeErr := driver.Close(ctx)
 		if closeErr != nil {
 			slog.Error("error closing driver: ", slog.Any("error", closeErr))
 		}
 	}()
-	if err != nil {
-		slog.Error("Error creating driver: ", slog.Any("error", err))
-		os.Exit(1)
-	}
-
 	err = driver.VerifyConnectivity(ctx)
 	if err != nil {
 		panic(err)
