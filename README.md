@@ -214,7 +214,7 @@ Used when `SECRETS_PROVIDER` is set to `aws`. This provider retrieves a JSON sec
 The AWS secret must be a JSON object with the following keys:
 ```json
 {
-  "url": "bolt://your-neo4j-host:7687",
+  "url": "neo4j://your-neo4j-host:7687",
   "username": "neo4j",
   "password": "your-password"
 }
