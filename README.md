@@ -170,10 +170,12 @@ Releases will always have a date; releases without a date are assigned `now()` a
    ```
 3. Set the required environment variables:
    ```sh
+   export SECRETS_PROVIDER=env
    export DB_URL=neo4j://localhost:7687
    export DB_USERNAME=neo4j
    export DB_PASSWORD=password
    ```
+   *Note: These environment variables use the default `env` secrets provider. See [Configuration](#configuration) for alternative providers.*
 4. Build and run the application:
    ```sh
    go build -o service-atlas ./cmd/service-atlas
