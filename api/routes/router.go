@@ -103,5 +103,6 @@ func setupSystemCalls(r chi.Router) {
 	slog.Debug("Setting up system calls")
 	r.Get("/time", system.GetTime)
 	r.Get("/database", system.GetDbAddress)
+	r.Get("/version", system.GetVersion)
 	r.Get("/helloworld", helloworld.HelloWorld)
 }

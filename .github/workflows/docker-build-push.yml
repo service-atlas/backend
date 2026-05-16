@@ -33,6 +33,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Parse TOML
+        id: toml
+        run: |
+          python3 - <<'EOF'
+          import tomllib
+          import os
+
+          with open("project.toml", "rb") as f:
+              data = tomllib.load(f)
+
+          # Write values to GITHUB_OUTPUT
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"version={data['version']}\n")
+          EOF
+
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v6
@@ -40,6 +55,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest
+            type=raw,value=${{ steps.toml.outputs.version }}
             type=sha,format=long,prefix=sha-
             type=sha,format=short,prefix=sha-
 
@@ -72,6 +88,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            Version=${{ steps.toml.outputs.version }}
 
       - name: Skip push (tag exists)
         if: steps.check.outputs.exists == 'true'

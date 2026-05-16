@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -66,5 +67,29 @@ func TestSetupSystemCalls_Database(t *testing.T) {
 
 	if got := rr.Body.String(); got != "bolt://db:7687" {
 		t.Fatalf("/database expected body 'bolt://db:7687', got %q", got)
+	}
+}
+
+func TestSetupSystemCalls_Version(t *testing.T) {
+	router := newSystemRouter()
+
+	req := httptest.NewRequest(http.MethodGet, "/version", nil)
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("/version expected status 200, got %d", rr.Code)
+	}
+
+	var resp struct {
+		Version string `json:"version"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("/version failed to unmarshal JSON: %v", err)
+	}
+
+	if resp.Version != "dev" {
+		t.Fatalf("/version expected body version 'dev', got %q", resp.Version)
 	}
 }

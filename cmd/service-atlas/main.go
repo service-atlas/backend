@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"service-atlas/api/routes"
+	"service-atlas/api/system"
 	"service-atlas/internal/config"
 	"service-atlas/internal/secrets"
 	"service-atlas/neo4jrepositories"
@@ -62,7 +63,7 @@ func main() {
 		Addr:    config.GetConfigValue("address"),
 	}
 
-	slog.Info("Starting Web Server")
+	slog.Info("Starting Web Server", "version", system.Version)
 	go func() {
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("listen error", slog.Any("error", err))
