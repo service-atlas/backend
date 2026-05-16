@@ -1,6 +1,7 @@
 package system
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -56,5 +57,29 @@ func TestGetDbAddressError(t *testing.T) {
 	b := rw.Body.String()
 	if !strings.HasPrefix(b, "Could not find environment variable") {
 		t.Errorf("GetDbAddress errored with %s", b)
+	}
+}
+
+func TestGetVersion(t *testing.T) {
+	req, err := http.NewRequest("GET", "/version", nil)
+	if err != nil {
+		t.Fatal(req)
+	}
+	rw := httptest.NewRecorder()
+	GetVersion(rw, req)
+	if rw.Code != http.StatusOK {
+		t.Errorf("GetVersion errored with %d", rw.Code)
+	}
+
+	var resp struct {
+		Version string `json:"version"`
+	}
+	err = json.Unmarshal(rw.Body.Bytes(), &resp)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if resp.Version != Version {
+		t.Errorf("GetVersion returned unexpected version: %s, expected: %s", resp.Version, Version)
 	}
 }
