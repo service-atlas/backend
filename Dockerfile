@@ -22,9 +22,10 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 COPY . .
 
 # Build the service binary
+ARG Version=dev
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go build -ldflags="-s -w" -o /out/service-atlas ./cmd/service-atlas
+    go build -trimpath -ldflags="-s -w -X 'service-atlas/api/system.Version=${Version}'" -o /out/service-atlas ./cmd/service-atlas
 
 ########################
 # Runtime stage (scratch)
