@@ -105,4 +105,7 @@ func setupSystemCalls(r chi.Router) {
 	r.Get("/database", system.GetDbAddress)
 	r.Get("/version", system.GetVersion)
 	r.Get("/helloworld", helloworld.HelloWorld)
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 }
