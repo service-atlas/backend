@@ -93,3 +93,16 @@ func TestSetupSystemCalls_Version(t *testing.T) {
 		t.Fatalf("/version expected body version 'dev', got %q", resp.Version)
 	}
 }
+
+func TestSetupSystemCalls_Health(t *testing.T) {
+	router := newSystemRouter()
+
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("/health expected status 200, got %d", rr.Code)
+	}
+}
