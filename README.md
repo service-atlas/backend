@@ -190,6 +190,7 @@ The application is configured using environment variables. The primary configura
 
 - `SECRETS_PROVIDER`: Defines how database credentials are retrieved. Options: `env` (default), `aws`.
 - `LOG_LEVEL`: Controls logging verbosity. Options: `debug`, `info` (default), `warning`, `error`.
+- `LOG_HEALTH`: Controls whether requests to the `/health` endpoint are logged. Defaults to `false`. Set to `true` to enable health check logs.
 
 ### Database Connectivity & Secrets Management
 
