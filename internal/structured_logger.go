@@ -3,6 +3,7 @@ package internal
 import (
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -10,22 +11,7 @@ func StructuredLoggerFromContext() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			logger := LoggerFromContext(r.Context())
-			start := time.Now()
-
-			// Use a wrapper to get the status code
-			ww := &responseWriter{ResponseWriter: w, status: http.StatusOK}
-			next.ServeHTTP(ww, r)
-
-			duration := time.Since(start)
-
-			logger.Info("WEB_REQUEST",
-				slog.String("method", r.Method),
-				slog.String("path", r.URL.Path),
-				slog.Int("status", ww.status),
-				slog.String("remote", r.RemoteAddr),
-				slog.String("user_agent", r.UserAgent()),
-				slog.Int64("duration_ms", duration.Milliseconds()),
-			)
+			recordRequest(logger, next, w, r)
 		})
 	}
 }
@@ -34,24 +20,33 @@ func StructuredLoggerFromContext() func(http.Handler) http.Handler {
 func StructuredLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
-
-			// Use a wrapper to get the status code
-			ww := &responseWriter{ResponseWriter: w, status: http.StatusOK}
-			next.ServeHTTP(ww, r)
-
-			duration := time.Since(start)
-
-			logger.Info("WEB_REQUEST",
-				slog.String("method", r.Method),
-				slog.String("path", r.URL.Path),
-				slog.Int("status", ww.status),
-				slog.String("remote", r.RemoteAddr),
-				slog.String("user_agent", r.UserAgent()),
-				slog.Int64("duration_ms", duration.Milliseconds()),
-			)
+			recordRequest(logger, next, w, r)
 		})
 	}
+}
+
+func recordRequest(logger *slog.Logger, next http.Handler, w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+
+	// Use a wrapper to get the status code
+	ww := &responseWriter{ResponseWriter: w, status: http.StatusOK}
+	next.ServeHTTP(ww, r)
+
+	logHealth := os.Getenv("LOG_HEALTH") == "true"
+
+	if r.URL.Path == "/health" && !logHealth {
+		return
+	}
+	duration := time.Since(start)
+
+	logger.Info("WEB_REQUEST",
+		slog.String("method", r.Method),
+		slog.String("path", r.URL.Path),
+		slog.Int("status", ww.status),
+		slog.String("remote", r.RemoteAddr),
+		slog.String("user_agent", r.UserAgent()),
+		slog.Int64("duration_ms", duration.Milliseconds()),
+	)
 }
 
 // responseWriter wraps http.ResponseWriter to capture the status code
