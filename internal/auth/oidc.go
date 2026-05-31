@@ -8,25 +8,39 @@ import (
 )
 
 type AuthConfig struct {
-	Enabled  bool
-	Issuer   string
-	Audience string
-	JWKSURL  string
+	enabled  bool
+	issuer   string
+	audience string
+	jwksURL  string
+}
+
+func (cfg *AuthConfig) Enabled() bool {
+	return cfg.enabled
+}
+
+func (cfg *AuthConfig) Issuer() string {
+	return cfg.issuer
+}
+func (cfg *AuthConfig) Audience() string {
+	return cfg.audience
+}
+func (cfg *AuthConfig) JWKSURL() string {
+	return cfg.jwksURL
 }
 
 func NewAuthConfig() (*AuthConfig, error) {
 	cfg := AuthConfig{
-		Enabled:  false,
-		JWKSURL:  "",
-		Issuer:   "",
-		Audience: "",
+		enabled:  false,
+		jwksURL:  "",
+		issuer:   "",
+		audience: "",
 	}
 	oidcIssuer := strings.TrimSpace(os.Getenv("OIDC_ISSUER"))
 	oidcAudience := strings.TrimSpace(os.Getenv("OIDC_AUDIENCE"))
 	oidcJWKSURL := strings.TrimSpace(os.Getenv("OIDC_JWKS_URL"))
 
 	if oidcIssuer == "" && oidcAudience == "" && oidcJWKSURL == "" {
-		cfg.Enabled = false
+		cfg.enabled = false
 		return &cfg, nil
 	}
 
@@ -40,10 +54,10 @@ func NewAuthConfig() (*AuthConfig, error) {
 	}
 
 	if partialFound == 3 {
-		cfg.Enabled = true
-		cfg.Issuer = oidcIssuer
-		cfg.Audience = oidcAudience
-		cfg.JWKSURL = oidcJWKSURL
+		cfg.enabled = true
+		cfg.issuer = oidcIssuer
+		cfg.audience = oidcAudience
+		cfg.jwksURL = oidcJWKSURL
 	} else if partialFound < 3 {
 		errMsg := "OIDC_ISSUER, OIDC_AUDIENCE, and OIDC_JWKS_URL must be set"
 		slog.Error(errMsg, slog.String("OIDC_ISSUER", oidcIssuer), slog.String("OIDC_AUDIENCE", oidcAudience), slog.String("OIDC_JWKS_URL", oidcJWKSURL))

@@ -66,6 +66,16 @@ func TestNewAuthConfig(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Whitespace variables",
+			env: map[string]string{
+				"OIDC_ISSUER":   "   ",
+				"OIDC_AUDIENCE": "   ",
+				"OIDC_JWKS_URL": "   ",
+			},
+			wantEnabled: false,
+			wantErr:     false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -89,17 +99,17 @@ func TestNewAuthConfig(t *testing.T) {
 				return
 			}
 
-			if cfg.Enabled != tt.wantEnabled {
-				t.Errorf("NewAuthConfig() Enabled = %v, want %v", cfg.Enabled, tt.wantEnabled)
+			if cfg.Enabled() != tt.wantEnabled {
+				t.Errorf("NewAuthConfig() Enabled = %v, want %v", cfg.Enabled(), tt.wantEnabled)
 			}
-			if cfg.Issuer != tt.wantIssuer {
-				t.Errorf("NewAuthConfig() Issuer = %v, want %v", cfg.Issuer, tt.wantIssuer)
+			if cfg.Issuer() != tt.wantIssuer {
+				t.Errorf("NewAuthConfig() Issuer = %v, want %v", cfg.Issuer(), tt.wantIssuer)
 			}
-			if cfg.Audience != tt.wantAudience {
-				t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.Audience, tt.wantAudience)
+			if cfg.Audience() != tt.wantAudience {
+				t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.Audience(), tt.wantAudience)
 			}
-			if cfg.JWKSURL != tt.wantJWKSURL {
-				t.Errorf("NewAuthConfig() JWKSURL = %v, want %v", cfg.JWKSURL, tt.wantJWKSURL)
+			if cfg.JWKSURL() != tt.wantJWKSURL {
+				t.Errorf("NewAuthConfig() JWKSURL = %v, want %v", cfg.JWKSURL(), tt.wantJWKSURL)
 			}
 		})
 	}
