@@ -11,7 +11,6 @@ type AuthConfig struct {
 	enabled  bool
 	issuer   string
 	audience string
-	jwksURL  string
 }
 
 func (cfg *AuthConfig) Enabled() bool {
@@ -24,43 +23,28 @@ func (cfg *AuthConfig) Issuer() string {
 func (cfg *AuthConfig) Audience() string {
 	return cfg.audience
 }
-func (cfg *AuthConfig) JWKSURL() string {
-	return cfg.jwksURL
-}
 
 func NewAuthConfig() (*AuthConfig, error) {
 	cfg := AuthConfig{
 		enabled:  false,
-		jwksURL:  "",
 		issuer:   "",
 		audience: "",
 	}
 	oidcIssuer := strings.TrimSpace(os.Getenv("OIDC_ISSUER"))
 	oidcAudience := strings.TrimSpace(os.Getenv("OIDC_AUDIENCE"))
-	oidcJWKSURL := strings.TrimSpace(os.Getenv("OIDC_JWKS_URL"))
 
-	if oidcIssuer == "" && oidcAudience == "" && oidcJWKSURL == "" {
+	if oidcIssuer == "" && oidcAudience == "" {
 		cfg.enabled = false
 		return &cfg, nil
 	}
 
-	lengths := []int{len(oidcIssuer), len(oidcAudience), len(oidcJWKSURL)}
-
-	partialFound := 0
-	for _, l := range lengths {
-		if l > 0 {
-			partialFound++
-		}
-	}
-
-	if partialFound == 3 {
+	if len(oidcIssuer) > 0 && len(oidcAudience) > 0 {
 		cfg.enabled = true
 		cfg.issuer = oidcIssuer
 		cfg.audience = oidcAudience
-		cfg.jwksURL = oidcJWKSURL
-	} else if partialFound < 3 {
+	} else {
 		errMsg := "OIDC_ISSUER, OIDC_AUDIENCE, and OIDC_JWKS_URL must be set"
-		slog.Error(errMsg, slog.String("OIDC_ISSUER", oidcIssuer), slog.String("OIDC_AUDIENCE", oidcAudience), slog.String("OIDC_JWKS_URL", oidcJWKSURL))
+		slog.Error(errMsg, slog.String("OIDC_ISSUER", oidcIssuer), slog.String("OIDC_AUDIENCE", oidcAudience))
 		return nil, errors.New(errMsg)
 	}
 

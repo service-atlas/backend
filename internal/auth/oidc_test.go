@@ -11,7 +11,6 @@ func TestNewAuthConfig(t *testing.T) {
 		wantEnabled  bool
 		wantIssuer   string
 		wantAudience string
-		wantJWKSURL  string
 		wantErr      bool
 	}{
 		{
@@ -19,7 +18,6 @@ func TestNewAuthConfig(t *testing.T) {
 			env: map[string]string{
 				"OIDC_ISSUER":   "",
 				"OIDC_AUDIENCE": "",
-				"OIDC_JWKS_URL": "",
 			},
 			wantEnabled: false,
 			wantErr:     false,
@@ -29,12 +27,10 @@ func TestNewAuthConfig(t *testing.T) {
 			env: map[string]string{
 				"OIDC_ISSUER":   "https://issuer.com",
 				"OIDC_AUDIENCE": "audience",
-				"OIDC_JWKS_URL": "https://issuer.com/.well-known/jwks.json",
 			},
 			wantEnabled:  true,
 			wantIssuer:   "https://issuer.com",
 			wantAudience: "audience",
-			wantJWKSURL:  "https://issuer.com/.well-known/jwks.json",
 			wantErr:      false,
 		},
 		{
@@ -52,16 +48,15 @@ func TestNewAuthConfig(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Only JWKS URL set",
+			name: "Only Issuer set",
 			env: map[string]string{
-				"OIDC_JWKS_URL": "https://issuer.com/.well-known/jwks.json",
+				"OIDC_ISSUER": "https://issuer.com",
 			},
 			wantErr: true,
 		},
 		{
-			name: "Issuer and Audience set, JWKS URL missing",
+			name: "Only Audience set",
 			env: map[string]string{
-				"OIDC_ISSUER":   "https://issuer.com",
 				"OIDC_AUDIENCE": "audience",
 			},
 			wantErr: true,
@@ -71,7 +66,6 @@ func TestNewAuthConfig(t *testing.T) {
 			env: map[string]string{
 				"OIDC_ISSUER":   "   ",
 				"OIDC_AUDIENCE": "   ",
-				"OIDC_JWKS_URL": "   ",
 			},
 			wantEnabled: false,
 			wantErr:     false,
@@ -107,9 +101,6 @@ func TestNewAuthConfig(t *testing.T) {
 			}
 			if cfg.Audience() != tt.wantAudience {
 				t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.Audience(), tt.wantAudience)
-			}
-			if cfg.JWKSURL() != tt.wantJWKSURL {
-				t.Errorf("NewAuthConfig() JWKSURL = %v, want %v", cfg.JWKSURL(), tt.wantJWKSURL)
 			}
 		})
 	}
