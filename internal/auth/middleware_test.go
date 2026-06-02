@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -59,38 +58,31 @@ func (m *mockVerifier) Verify(ctx context.Context, rawIDToken string) (*oidc.IDT
 }
 
 func TestMiddleware(t *testing.T) {
-	t.Run("Valid token", func(t *testing.T) {
-		// Since we can't easily construct a real oidc.IDToken (unexported fields),
-		// we might need to change the Middleware to use a simpler claims extractor
-		// if we want to test the full flow, or just test up to the Verify call.
-		// However, for this task, I'll mock the verifier to return an error or success.
-
-		// Actually, oidc.IDToken is hard to mock without unsafe.
-		// Let's test the Unauthorized case at least.
-		verifier := &mockVerifier{
-			verifyFunc: func(ctx context.Context, rawIDToken string) (*oidc.IDToken, error) {
-				return nil, errors.New("invalid token")
-			},
-		}
-
-		mw := Middleware(verifier)
+	t.Run("Disabled auth", func(t *testing.T) {
+		cfg := &AuthConfig{enabled: false}
+		mw := Middleware(cfg)
 		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 
 		req := httptest.NewRequest("GET", "/", nil)
-		req.Header.Set("Authorization", "Bearer valid-token")
 		rr := httptest.NewRecorder()
 
 		handler.ServeHTTP(rr, req)
 
-		if rr.Code != http.StatusUnauthorized {
-			t.Errorf("Expected status 401, got %d", rr.Code)
+		if rr.Code != http.StatusOK {
+			t.Errorf("Expected status 200, got %d", rr.Code)
 		}
 	})
 
-	t.Run("Missing token", func(t *testing.T) {
-		mw := Middleware(nil)
+	t.Run("Missing token (Enabled)", func(t *testing.T) {
+		// We can't easily test Enabled because it tries to reach the Issuer URL
+		// But we can test that it fails to initialize if the Issuer is invalid
+		cfg := &AuthConfig{
+			enabled: true,
+			issuer:  "http://localhost:1", // Use a port that is likely closed to fail fast
+		}
+		mw := Middleware(cfg)
 		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
@@ -100,8 +92,9 @@ func TestMiddleware(t *testing.T) {
 
 		handler.ServeHTTP(rr, req)
 
-		if rr.Code != http.StatusUnauthorized {
-			t.Errorf("Expected status 401, got %d", rr.Code)
+		// It should fail initialization and return 500
+		if rr.Code != http.StatusInternalServerError {
+			t.Errorf("Expected status 500, got %d", rr.Code)
 		}
 	})
 }

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -33,7 +34,22 @@ func NameFromContext(ctx context.Context) string {
 	return ""
 }
 
-func Middleware(verifier TokenVerifier) func(http.Handler) http.Handler {
+func Middleware(authCfg *AuthConfig) func(http.Handler) http.Handler {
+	if !authCfg.Enabled() {
+		return func(next http.Handler) http.Handler {
+			return next
+		}
+	}
+	oidcProvider, err := oidc.NewProvider(context.Background(), authCfg.Issuer())
+	if err != nil {
+		slog.Error("Failed to initialize OIDC provider", slog.String("error", err.Error()))
+		return func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Failed to initialize OIDC provider", http.StatusInternalServerError)
+			})
+		}
+	}
+	verifier := oidcProvider.Verifier(&oidc.Config{ClientID: authCfg.Audience()})
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			rawToken := extractBearerToken(r.Header.Get("Authorization"))
