@@ -13,9 +13,8 @@ type TokenVerifier interface {
 }
 
 type Claims struct {
-	Subject string
-	Name    string
-	Email   string
+	Name  string `json:"service-atlas:name,omitempty"`
+	Email string `json:"service-atlas:email,omitempty"`
 }
 
 type nameContextKey struct{}
@@ -49,7 +48,8 @@ func Middleware(authCfg *AuthConfig) func(http.Handler) http.Handler {
 			})
 		}
 	}
-	verifier := oidcProvider.Verifier(&oidc.Config{ClientID: authCfg.Audience()})
+	verifier := oidcProvider.Verifier(&oidc.Config{ClientID: authCfg.ClientId()})
+	slog.Info("Initialized OIDC provider", slog.String("issuer", authCfg.Issuer()))
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			rawToken := extractBearerToken(r.Header.Get("Authorization"))
@@ -72,8 +72,8 @@ func Middleware(authCfg *AuthConfig) func(http.Handler) http.Handler {
 				nameCtx = context.WithValue(r.Context(), nameContextKey{}, claims.Name)
 			} else if claims.Email != "" {
 				nameCtx = context.WithValue(r.Context(), nameContextKey{}, claims.Email)
-			} else if claims.Subject != "" {
-				nameCtx = context.WithValue(r.Context(), nameContextKey{}, claims.Subject)
+			} else if token.Subject != "" {
+				nameCtx = context.WithValue(r.Context(), nameContextKey{}, token.Subject)
 			}
 
 			next.ServeHTTP(w, r.WithContext(nameCtx))

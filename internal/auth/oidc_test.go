@@ -16,8 +16,8 @@ func TestNewAuthConfig(t *testing.T) {
 		{
 			name: "All variables unset",
 			env: map[string]string{
-				"OIDC_ISSUER":   "",
-				"OIDC_AUDIENCE": "",
+				"OIDC_ISSUER":    "",
+				"OIDC_CLIENT_ID": "",
 			},
 			wantEnabled: false,
 			wantErr:     false,
@@ -25,8 +25,8 @@ func TestNewAuthConfig(t *testing.T) {
 		{
 			name: "All variables set",
 			env: map[string]string{
-				"OIDC_ISSUER":   "https://issuer.com",
-				"OIDC_AUDIENCE": "audience",
+				"OIDC_ISSUER":    "https://issuer.com",
+				"OIDC_CLIENT_ID": "audience",
 			},
 			wantEnabled:  true,
 			wantIssuer:   "https://issuer.com",
@@ -43,7 +43,7 @@ func TestNewAuthConfig(t *testing.T) {
 		{
 			name: "Only Audience set",
 			env: map[string]string{
-				"OIDC_AUDIENCE": "audience",
+				"OIDC_CLIENT_ID": "audience",
 			},
 			wantErr: true,
 		},
@@ -57,15 +57,15 @@ func TestNewAuthConfig(t *testing.T) {
 		{
 			name: "Only Audience set",
 			env: map[string]string{
-				"OIDC_AUDIENCE": "audience",
+				"OIDC_CLIENT_ID": "audience",
 			},
 			wantErr: true,
 		},
 		{
 			name: "Whitespace variables",
 			env: map[string]string{
-				"OIDC_ISSUER":   "   ",
-				"OIDC_AUDIENCE": "   ",
+				"OIDC_ISSUER":    "   ",
+				"OIDC_AUDI	ENCE": "   ",
 			},
 			wantEnabled: false,
 			wantErr:     false,
@@ -76,8 +76,7 @@ func TestNewAuthConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Clear relevant env vars first to ensure clean state
 			t.Setenv("OIDC_ISSUER", "")
-			t.Setenv("OIDC_AUDIENCE", "")
-			t.Setenv("OIDC_JWKS_URL", "")
+			t.Setenv("OIDC_CLIENT_ID", "")
 
 			for k, v := range tt.env {
 				t.Setenv(k, v)
@@ -99,8 +98,8 @@ func TestNewAuthConfig(t *testing.T) {
 			if cfg.Issuer() != tt.wantIssuer {
 				t.Errorf("NewAuthConfig() Issuer = %v, want %v", cfg.Issuer(), tt.wantIssuer)
 			}
-			if cfg.Audience() != tt.wantAudience {
-				t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.Audience(), tt.wantAudience)
+			if cfg.ClientId() != tt.wantAudience {
+				t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.ClientId(), tt.wantAudience)
 			}
 		})
 	}

@@ -10,7 +10,7 @@ import (
 type AuthConfig struct {
 	enabled  bool
 	issuer   string
-	audience string
+	clientId string
 }
 
 func (cfg *AuthConfig) Enabled() bool {
@@ -20,31 +20,31 @@ func (cfg *AuthConfig) Enabled() bool {
 func (cfg *AuthConfig) Issuer() string {
 	return cfg.issuer
 }
-func (cfg *AuthConfig) Audience() string {
-	return cfg.audience
+func (cfg *AuthConfig) ClientId() string {
+	return cfg.clientId
 }
 
 func NewAuthConfig() (*AuthConfig, error) {
 	cfg := AuthConfig{
 		enabled:  false,
 		issuer:   "",
-		audience: "",
+		clientId: "",
 	}
 	oidcIssuer := strings.TrimSpace(os.Getenv("OIDC_ISSUER"))
-	oidcAudience := strings.TrimSpace(os.Getenv("OIDC_AUDIENCE"))
+	oidcClientId := strings.TrimSpace(os.Getenv("OIDC_CLIENT_ID"))
 
-	if oidcIssuer == "" && oidcAudience == "" {
+	if oidcIssuer == "" && oidcClientId == "" {
 		cfg.enabled = false
 		return &cfg, nil
 	}
 
-	if len(oidcIssuer) > 0 && len(oidcAudience) > 0 {
+	if len(oidcIssuer) > 0 && len(oidcClientId) > 0 {
 		cfg.enabled = true
 		cfg.issuer = oidcIssuer
-		cfg.audience = oidcAudience
+		cfg.clientId = oidcClientId
 	} else {
-		errMsg := "OIDC_ISSUER, OIDC_AUDIENCE, and OIDC_JWKS_URL must be set"
-		slog.Error(errMsg, slog.String("OIDC_ISSUER", oidcIssuer), slog.String("OIDC_AUDIENCE", oidcAudience))
+		errMsg := "OIDC_ISSUER, OIDC_AUDIENCE, and OIDC_CLIENT_ID must be set"
+		slog.Error(errMsg, slog.String("OIDC_ISSUER", oidcIssuer), slog.String("OIDC_AUDIENCE", oidcClientId))
 		return nil, errors.New(errMsg)
 	}
 
