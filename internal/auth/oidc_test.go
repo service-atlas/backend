@@ -1,10 +1,44 @@
 package auth
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
+func startMockOIDCServer() *httptest.Server {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+
+	// OIDC Discovery
+	mux.HandleFunc("/.well-known/openid-configuration", func(w http.ResponseWriter, r *http.Request) {
+		config := map[string]any{
+			"issuer":                                server.URL,
+			"jwks_uri":                              fmt.Sprintf("%s/keys", server.URL),
+			"id_token_signing_alg_values_supported": []string{"RS256"},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(config)
+	})
+
+	// JWKS
+	mux.HandleFunc("/keys", func(w http.ResponseWriter, r *http.Request) {
+		jwks := map[string]any{
+			"keys": []any{},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(jwks)
+	})
+
+	return server
+}
+
 func TestNewAuthConfig(t *testing.T) {
+	server := startMockOIDCServer()
+	defer server.Close()
+
 	tests := []struct {
 		name            string
 		env             map[string]string
@@ -25,19 +59,19 @@ func TestNewAuthConfig(t *testing.T) {
 		{
 			name: "All variables set",
 			env: map[string]string{
-				"OIDC_ISSUER":        "https://issuer.com",
+				"OIDC_ISSUER":        server.URL,
 				"OIDC_MCP_CLIENT_ID": "client-id",
 				"OIDC_AUDIENCE":      "audience",
 			},
 			wantEnabled:     true,
-			wantIssuer:      "https://issuer.com",
+			wantIssuer:      server.URL,
 			wantAudience:    "audience",
 			wantMCPClientID: "client-id",
 		},
 		{
 			name: "Only Issuer set",
 			env: map[string]string{
-				"OIDC_ISSUER": "https://issuer.com",
+				"OIDC_ISSUER": server.URL,
 			},
 			wantEnabled: false,
 		},
@@ -53,6 +87,7 @@ func TestNewAuthConfig(t *testing.T) {
 			env: map[string]string{
 				"OIDC_ISSUER":        "   ",
 				"OIDC_MCP_CLIENT_ID": "   ",
+				"OIDC_AUDIENCE":      "   ",
 			},
 			wantEnabled: false,
 		},
@@ -60,9 +95,6 @@ func TestNewAuthConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if testing.Short() && tt.wantEnabled {
-				t.Skip("skipping test that requires network in short mode")
-			}
 			// Clear relevant env vars first to ensure clean state
 			t.Setenv("OIDC_ISSUER", "")
 			t.Setenv("OIDC_MCP_CLIENT_ID", "")
