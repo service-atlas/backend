@@ -1,68 +1,53 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/coreos/go-oidc/v3/oidc"
 )
 
 type AuthConfig struct {
 	enabled  bool
-	issuer   string
-	audience string
-	jwksURL  string
+	Verifier TokenVerifier
 }
 
 func (cfg *AuthConfig) Enabled() bool {
 	return cfg.enabled
 }
 
-func (cfg *AuthConfig) Issuer() string {
-	return cfg.issuer
-}
-func (cfg *AuthConfig) Audience() string {
-	return cfg.audience
-}
-func (cfg *AuthConfig) JWKSURL() string {
-	return cfg.jwksURL
-}
-
 func NewAuthConfig() (*AuthConfig, error) {
-	cfg := AuthConfig{
-		enabled:  false,
-		jwksURL:  "",
-		issuer:   "",
-		audience: "",
-	}
 	oidcIssuer := strings.TrimSpace(os.Getenv("OIDC_ISSUER"))
-	oidcAudience := strings.TrimSpace(os.Getenv("OIDC_AUDIENCE"))
-	oidcJWKSURL := strings.TrimSpace(os.Getenv("OIDC_JWKS_URL"))
+	oidcClientId := strings.TrimSpace(os.Getenv("OIDC_CLIENT_ID"))
 
-	if oidcIssuer == "" && oidcAudience == "" && oidcJWKSURL == "" {
+	cfg := AuthConfig{
+		enabled: true,
+	}
+
+	if len(oidcIssuer) == 0 || len(oidcClientId) == 0 {
 		cfg.enabled = false
+		slog.Info("OIDC authentication disabled")
 		return &cfg, nil
 	}
-
-	lengths := []int{len(oidcIssuer), len(oidcAudience), len(oidcJWKSURL)}
-
-	partialFound := 0
-	for _, l := range lengths {
-		if l > 0 {
-			partialFound++
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	oidcProvider, err := oidc.NewProvider(ctxWithTimeout, oidcIssuer)
+	if err != nil {
+		if errors.Is(ctxWithTimeout.Err(), context.DeadlineExceeded) {
+			slog.Error("Failed to initialize OIDC provider", slog.String("error", "timeout"), slog.String("issuer", oidcIssuer))
+		} else {
+			slog.Error("Failed to initialize OIDC provider", slog.String("error", err.Error()), slog.String("issuer", oidcIssuer))
 		}
+		return nil, err
 	}
-
-	if partialFound == 3 {
-		cfg.enabled = true
-		cfg.issuer = oidcIssuer
-		cfg.audience = oidcAudience
-		cfg.jwksURL = oidcJWKSURL
-	} else if partialFound < 3 {
-		errMsg := "OIDC_ISSUER, OIDC_AUDIENCE, and OIDC_JWKS_URL must be set"
-		slog.Error(errMsg, slog.String("OIDC_ISSUER", oidcIssuer), slog.String("OIDC_AUDIENCE", oidcAudience), slog.String("OIDC_JWKS_URL", oidcJWKSURL))
-		return nil, errors.New(errMsg)
-	}
+	slog.Info("OIDC authentication enabled",
+		slog.String("issuer", oidcIssuer),
+		slog.String("client_id", oidcClientId))
+	cfg.Verifier = oidcProvider.Verifier(&oidc.Config{ClientID: oidcClientId})
 
 	return &cfg, nil
 }

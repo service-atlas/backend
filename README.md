@@ -197,11 +197,18 @@ The application is configured using environment variables. The primary configura
 Authentication is optional. To enable OIDC-based authentication, all of the following environment variables must be set:
 
 - `OIDC_ISSUER`: The URL of the OIDC issuer (e.g., `https://accounts.google.com`).
-- `OIDC_AUDIENCE`: The expected audience (client ID) for the tokens.
-- `OIDC_JWKS_URL`: The URL to the issuer's JSON Web Key Set (JWKS) (e.g., `https://www.googleapis.com/oauth2/v3/certs`).
+- `OIDC_CLIENT_ID`: The expected audience (client ID) for the tokens.
 
 If any of these variables are missing, authentication will be disabled.
-_Note:_ this is still a work in progress and not fully functional
+
+#### JWT Claims
+
+When authentication is enabled, the middleware expects and extracts user information from the following namespaced claims in the JWT:
+
+- `service-atlas:name`: The full name of the user.
+- `service-atlas:email`: The email address of the user.
+
+If neither is present, it falls back to the `sub` (subject) claim for identification.
 
 ### Database Connectivity & Secrets Management
 

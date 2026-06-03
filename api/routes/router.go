@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"log"
 	"log/slog"
 	"net/http"
 	"service-atlas/api/debt"
@@ -12,6 +13,7 @@ import (
 	"service-atlas/api/system"
 	"service-atlas/api/teams"
 	"service-atlas/internal"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/config"
 
 	"github.com/go-chi/chi/v5"
@@ -39,54 +41,64 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 	reportHandler := reports.New(driver)
 	teamHandler := teams.New(driver)
 
-	router.Get("/releases/{startDate}/{endDate}", releaseHandler.GetReleasesInDateRange)
-	router.Get("/reports/services/{id}/risk", reportHandler.GetComprehensiveRiskReport)
-	router.Get("/reports/services/{id}/change_risk", reportHandler.GetServiceChangeRisk)
-	router.Get("/reports/services/debt", reportHandler.GetServiceDebtReport)
-	router.Get("/reports/services/tier", reportHandler.GetServicesByTier)
-	router.Patch("/debt/{id}", debtHandler.UpdateDebtStatus)
+	authCfg, err := auth.NewAuthConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	router.Route("/services", func(r chi.Router) {
-		r.Get("/", serviceHandler.GetAllServices)
-		r.Post("/", serviceHandler.CreateService)
-		r.Get("/search", serviceHandler.Search)
-		r.Get("/types", reportHandler.GetServiceTypes)
+	router.Group(func(r chi.Router) {
 
-		r.Route("/{id}", func(r chi.Router) {
-			r.Get("/", serviceHandler.GetById)
-			r.Put("/", serviceHandler.UpdateService)
-			r.Delete("/", serviceHandler.DeleteServiceById)
-			r.Get("/teams", serviceHandler.GetTeamsByServiceId)
+		r.Use(auth.Middleware(authCfg))
 
-			r.Get("/dependencies", dependencyHandler.GetDependencies)
-			r.Get("/dependents", dependencyHandler.GetDependents)
-			r.Post("/dependency", dependencyHandler.CreateDependency)
-			r.Delete("/dependency/{id2}", dependencyHandler.DeleteDependency)
+		r.Get("/releases/{startDate}/{endDate}", releaseHandler.GetReleasesInDateRange)
+		r.Get("/reports/services/{id}/risk", reportHandler.GetComprehensiveRiskReport)
+		r.Get("/reports/services/{id}/change_risk", reportHandler.GetServiceChangeRisk)
+		r.Get("/reports/services/debt", reportHandler.GetServiceDebtReport)
+		r.Get("/reports/services/tier", reportHandler.GetServicesByTier)
+		r.Patch("/debt/{id}", debtHandler.UpdateDebtStatus)
 
-			r.Route("/debt", func(r chi.Router) {
-				r.Post("/", debtHandler.CreateDebt)
-				r.Get("/", debtHandler.GetDebtByServiceId)
+		r.Route("/services", func(r chi.Router) {
+			r.Get("/", serviceHandler.GetAllServices)
+			r.Post("/", serviceHandler.CreateService)
+			r.Get("/search", serviceHandler.Search)
+			r.Get("/types", reportHandler.GetServiceTypes)
+
+			r.Route("/{id}", func(r chi.Router) {
+				r.Get("/", serviceHandler.GetById)
+				r.Put("/", serviceHandler.UpdateService)
+				r.Delete("/", serviceHandler.DeleteServiceById)
+				r.Get("/teams", serviceHandler.GetTeamsByServiceId)
+
+				r.Get("/dependencies", dependencyHandler.GetDependencies)
+				r.Get("/dependents", dependencyHandler.GetDependents)
+				r.Post("/dependency", dependencyHandler.CreateDependency)
+				r.Delete("/dependency/{id2}", dependencyHandler.DeleteDependency)
+
+				r.Route("/debt", func(r chi.Router) {
+					r.Post("/", debtHandler.CreateDebt)
+					r.Get("/", debtHandler.GetDebtByServiceId)
+				})
+
+				r.Route("/release", func(r chi.Router) {
+					r.Post("/", releaseHandler.CreateRelease)
+					r.Get("/", releaseHandler.GetReleasesByServiceId)
+				})
+
 			})
+		})
 
-			r.Route("/release", func(r chi.Router) {
-				r.Post("/", releaseHandler.CreateRelease)
-				r.Get("/", releaseHandler.GetReleasesByServiceId)
+		r.Route("/teams", func(r chi.Router) {
+			r.Post("/", teamHandler.CreateTeam)
+			r.Get("/", teamHandler.GetTeams)
+			r.Delete("/{id}", teamHandler.DeleteTeam)
+			r.Get("/{id}", teamHandler.GetTeam)
+			r.Put("/{id}", teamHandler.UpdateTeam)
+			r.Route("/{teamId}/services/{serviceId}", func(r chi.Router) {
+				r.Put("/", teamHandler.CreateTeamAssociation)
+				r.Delete("/", teamHandler.DeleteTeamAssociation)
 			})
-
+			r.Get("/{teamId}/services", reportHandler.GetServicesByTeam)
 		})
-	})
-
-	router.Route("/teams", func(r chi.Router) {
-		r.Post("/", teamHandler.CreateTeam)
-		r.Get("/", teamHandler.GetTeams)
-		r.Delete("/{id}", teamHandler.DeleteTeam)
-		r.Get("/{id}", teamHandler.GetTeam)
-		r.Put("/{id}", teamHandler.UpdateTeam)
-		r.Route("/{teamId}/services/{serviceId}", func(r chi.Router) {
-			r.Put("/", teamHandler.CreateTeamAssociation)
-			r.Delete("/", teamHandler.DeleteTeamAssociation)
-		})
-		r.Get("/{teamId}/services", reportHandler.GetServicesByTeam)
 	})
 	return router
 }
