@@ -32,7 +32,8 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 	router.Use(middleware.Compress(5))
 
 	setupCORS(router)
-	setupSystemCalls(router)
+	authCfg, err := auth.NewAuthConfig()
+	setupSystemCalls(router, authCfg)
 
 	serviceHandler := services.New(driver)
 	debtHandler := debt.New(driver)
@@ -41,7 +42,6 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 	reportHandler := reports.New(driver)
 	teamHandler := teams.New(driver)
 
-	authCfg, err := auth.NewAuthConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,7 +111,7 @@ func setupCORS(r chi.Router) {
 	}))
 }
 
-func setupSystemCalls(r chi.Router) {
+func setupSystemCalls(r chi.Router, cfg *auth.Config) {
 	slog.Debug("Setting up system calls")
 	r.Get("/time", system.GetTime)
 	r.Get("/database", system.GetDbAddress)
@@ -120,4 +120,5 @@ func setupSystemCalls(r chi.Router) {
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
+	r.Get("/auth/mcp/config", system.CreateMCPAuthEndpoint(cfg))
 }
