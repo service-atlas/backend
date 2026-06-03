@@ -197,9 +197,20 @@ The application is configured using environment variables. The primary configura
 Authentication is optional. To enable OIDC-based authentication, all of the following environment variables must be set:
 
 - `OIDC_ISSUER`: The URL of the OIDC issuer (e.g., `https://accounts.google.com`).
-- `OIDC_CLIENT_ID`: The expected audience (client ID) for the tokens.
+- `OIDC_AUDIENCE`: The expected audience for the tokens.
+- `OIDC_MCP_CLIENT_ID`: The client ID used for MCP-side authentication.
 
-If any of these variables are missing, authentication will be disabled.
+If `OIDC_ISSUER` or `OIDC_AUDIENCE` are missing, authentication will be disabled.
+
+#### MCP Authentication & Discovery
+
+The service provides a discovery endpoint at `/auth/mcp/config` which helps MCP (Model Context Protocol) clients understand the required authentication configuration.
+
+When OIDC is enabled, this endpoint returns:
+- `auth_mode`: "enabled" (or "disabled"/"none" if configuration is incomplete)
+- `oidc`: Contains the `issuer`, `client_id` (from `OIDC_MCP_CLIENT_ID`), and `audience` (from `OIDC_AUDIENCE`).
+
+This allows the MCP client to automatically configure itself to obtain a JWT from the correct issuer with the correct audience and client ID, enabling secure communication with the Service Atlas API.
 
 #### JWT Claims
 
