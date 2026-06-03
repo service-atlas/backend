@@ -11,7 +11,6 @@ func TestNewAuthConfig(t *testing.T) {
 		wantEnabled  bool
 		wantIssuer   string
 		wantAudience string
-		wantErr      bool
 	}{
 		{
 			name: "All variables unset",
@@ -20,7 +19,6 @@ func TestNewAuthConfig(t *testing.T) {
 				"OIDC_CLIENT_ID": "",
 			},
 			wantEnabled: false,
-			wantErr:     false,
 		},
 		{
 			name: "All variables set",
@@ -31,44 +29,42 @@ func TestNewAuthConfig(t *testing.T) {
 			wantEnabled:  true,
 			wantIssuer:   "https://issuer.com",
 			wantAudience: "audience",
-			wantErr:      false,
 		},
 		{
 			name: "Only Issuer set",
 			env: map[string]string{
 				"OIDC_ISSUER": "https://issuer.com",
 			},
-			wantErr: true,
+			wantEnabled: false,
 		},
 		{
 			name: "Only Audience set",
 			env: map[string]string{
 				"OIDC_CLIENT_ID": "audience",
 			},
-			wantErr: true,
+			wantEnabled: false,
 		},
 		{
 			name: "Only Issuer set",
 			env: map[string]string{
 				"OIDC_ISSUER": "https://issuer.com",
 			},
-			wantErr: true,
+			wantEnabled: false,
 		},
 		{
 			name: "Only Audience set",
 			env: map[string]string{
 				"OIDC_CLIENT_ID": "audience",
 			},
-			wantErr: true,
+			wantEnabled: false,
 		},
 		{
 			name: "Whitespace variables",
 			env: map[string]string{
-				"OIDC_ISSUER":    "   ",
-				"OIDC_AUDI	ENCE": "   ",
+				"OIDC_ISSUER":   "   ",
+				"OIDC_AUDIENCE": "   ",
 			},
 			wantEnabled: false,
-			wantErr:     false,
 		},
 	}
 
@@ -82,24 +78,18 @@ func TestNewAuthConfig(t *testing.T) {
 				t.Setenv(k, v)
 			}
 
-			cfg, err := NewAuthConfig()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewAuthConfig() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			if tt.wantErr {
-				return
-			}
+			cfg := NewAuthConfig()
 
 			if cfg.Enabled() != tt.wantEnabled {
 				t.Errorf("NewAuthConfig() Enabled = %v, want %v", cfg.Enabled(), tt.wantEnabled)
 			}
-			if cfg.Issuer() != tt.wantIssuer {
-				t.Errorf("NewAuthConfig() Issuer = %v, want %v", cfg.Issuer(), tt.wantIssuer)
-			}
-			if cfg.ClientId() != tt.wantAudience {
-				t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.ClientId(), tt.wantAudience)
+			if cfg.Enabled() {
+				if cfg.Issuer() != tt.wantIssuer {
+					t.Errorf("NewAuthConfig() Issuer = %v, want %v", cfg.Issuer(), tt.wantIssuer)
+				}
+				if cfg.ClientId() != tt.wantAudience {
+					t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.ClientId(), tt.wantAudience)
+				}
 			}
 		})
 	}

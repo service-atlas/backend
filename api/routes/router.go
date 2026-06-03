@@ -41,11 +41,7 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 	teamHandler := teams.New(driver)
 
 	router.Group(func(r chi.Router) {
-		authCfg, err := auth.NewAuthConfig()
-		if err != nil {
-			slog.Error("Failed to initialize auth config", "error", err)
-			return
-		}
+		authCfg := auth.NewAuthConfig()
 		r.Use(auth.Middleware(authCfg))
 
 		r.Get("/releases/{startDate}/{endDate}", releaseHandler.GetReleasesInDateRange)

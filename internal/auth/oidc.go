@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"log/slog"
 	"os"
 	"strings"
@@ -24,29 +23,23 @@ func (cfg *AuthConfig) ClientId() string {
 	return cfg.clientId
 }
 
-func NewAuthConfig() (*AuthConfig, error) {
-	cfg := AuthConfig{
-		enabled:  false,
-		issuer:   "",
-		clientId: "",
-	}
+func NewAuthConfig() *AuthConfig {
 	oidcIssuer := strings.TrimSpace(os.Getenv("OIDC_ISSUER"))
 	oidcClientId := strings.TrimSpace(os.Getenv("OIDC_CLIENT_ID"))
 
-	if oidcIssuer == "" && oidcClientId == "" {
+	cfg := AuthConfig{
+		enabled:  true,
+		issuer:   oidcIssuer,
+		clientId: oidcClientId,
+	}
+
+	if len(oidcIssuer) == 0 || len(oidcClientId) == 0 {
 		cfg.enabled = false
-		return &cfg, nil
 	}
 
-	if len(oidcIssuer) > 0 && len(oidcClientId) > 0 {
-		cfg.enabled = true
-		cfg.issuer = oidcIssuer
-		cfg.clientId = oidcClientId
-	} else {
-		errMsg := "OIDC_ISSUER, OIDC_AUDIENCE, and OIDC_CLIENT_ID must be set"
-		slog.Error(errMsg, slog.String("OIDC_ISSUER", oidcIssuer), slog.String("OIDC_AUDIENCE", oidcClientId))
-		return nil, errors.New(errMsg)
+	if cfg.enabled {
+		slog.Info("OIDC authentication enabled with issuer: %s and client ID: %s", cfg.issuer, cfg.clientId)
 	}
 
-	return &cfg, nil
+	return &cfg
 }
