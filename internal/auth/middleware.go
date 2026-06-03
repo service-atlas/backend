@@ -34,22 +34,13 @@ func NameFromContext(ctx context.Context) string {
 }
 
 func Middleware(authCfg *AuthConfig) func(http.Handler) http.Handler {
-	if !authCfg.Enabled() {
+	if !authCfg.Enabled() || authCfg.Verifier == nil {
 		return func(next http.Handler) http.Handler {
 			return next
 		}
 	}
-	oidcProvider, err := oidc.NewProvider(context.Background(), authCfg.Issuer())
-	if err != nil {
-		slog.Error("Failed to initialize OIDC provider", slog.String("error", err.Error()))
-		return func(next http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Failed to initialize OIDC provider", http.StatusInternalServerError)
-			})
-		}
-	}
-	verifier := oidcProvider.Verifier(&oidc.Config{ClientID: authCfg.ClientId()})
-	slog.Info("Initialized OIDC provider", slog.String("issuer", authCfg.Issuer()))
+
+	slog.Info("Initialized OIDC Middleware")
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			rawToken := extractBearerToken(r.Header.Get("Authorization"))
@@ -57,7 +48,7 @@ func Middleware(authCfg *AuthConfig) func(http.Handler) http.Handler {
 				http.Error(w, "Unauthorized: missing or invalid token", http.StatusUnauthorized)
 				return
 			}
-			token, err := verifier.Verify(r.Context(), rawToken)
+			token, err := authCfg.Verifier.Verify(r.Context(), rawToken)
 			if err != nil {
 				http.Error(w, "Failed to verify token", http.StatusUnauthorized)
 				return

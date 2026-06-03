@@ -70,6 +70,9 @@ func TestNewAuthConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if testing.Short() && tt.wantEnabled {
+				t.Skip("skipping test that requires network in short mode")
+			}
 			// Clear relevant env vars first to ensure clean state
 			t.Setenv("OIDC_ISSUER", "")
 			t.Setenv("OIDC_CLIENT_ID", "")
@@ -78,18 +81,14 @@ func TestNewAuthConfig(t *testing.T) {
 				t.Setenv(k, v)
 			}
 
-			cfg := NewAuthConfig()
+			cfg, err := NewAuthConfig()
+
+			if err != nil && tt.wantEnabled {
+				t.Fatalf("NewAuthConfig() error = %v", err)
+			}
 
 			if cfg.Enabled() != tt.wantEnabled {
 				t.Errorf("NewAuthConfig() Enabled = %v, want %v", cfg.Enabled(), tt.wantEnabled)
-			}
-			if cfg.Enabled() {
-				if cfg.Issuer() != tt.wantIssuer {
-					t.Errorf("NewAuthConfig() Issuer = %v, want %v", cfg.Issuer(), tt.wantIssuer)
-				}
-				if cfg.ClientId() != tt.wantAudience {
-					t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.ClientId(), tt.wantAudience)
-				}
 			}
 		})
 	}

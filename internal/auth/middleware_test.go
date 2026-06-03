@@ -76,11 +76,11 @@ func TestMiddleware(t *testing.T) {
 	})
 
 	t.Run("Missing token (Enabled)", func(t *testing.T) {
-		// We can't easily test Enabled because it tries to reach the Issuer URL
-		// But we can test that it fails to initialize if the Issuer is invalid
 		cfg := &AuthConfig{
 			enabled: true,
-			issuer:  "http://localhost:1", // Use a port that is likely closed to fail fast
+			Verifier: &mockVerifier{verifyFunc: func(ctx context.Context, rawIDToken string) (*oidc.IDToken, error) {
+				return nil, context.Canceled // Just some error
+			}},
 		}
 		mw := Middleware(cfg)
 		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -92,9 +92,8 @@ func TestMiddleware(t *testing.T) {
 
 		handler.ServeHTTP(rr, req)
 
-		// It should fail initialization and return 500
-		if rr.Code != http.StatusInternalServerError {
-			t.Errorf("Expected status 500, got %d", rr.Code)
+		if rr.Code != http.StatusUnauthorized {
+			t.Errorf("Expected status 401, got %d", rr.Code)
 		}
 	})
 }

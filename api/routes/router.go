@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"log"
 	"log/slog"
 	"net/http"
 	"service-atlas/api/debt"
@@ -40,8 +41,13 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 	reportHandler := reports.New(driver)
 	teamHandler := teams.New(driver)
 
+	authCfg, err := auth.NewAuthConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	router.Group(func(r chi.Router) {
-		authCfg := auth.NewAuthConfig()
+
 		r.Use(auth.Middleware(authCfg))
 
 		r.Get("/releases/{startDate}/{endDate}", releaseHandler.GetReleasesInDateRange)
