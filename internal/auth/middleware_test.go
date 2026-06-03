@@ -59,7 +59,7 @@ func (m *mockVerifier) Verify(ctx context.Context, rawIDToken string) (*oidc.IDT
 
 func TestMiddleware(t *testing.T) {
 	t.Run("Disabled auth", func(t *testing.T) {
-		cfg := &AuthConfig{enabled: false}
+		cfg := &Config{enabled: false}
 		mw := Middleware(cfg)
 		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
@@ -76,9 +76,9 @@ func TestMiddleware(t *testing.T) {
 	})
 
 	t.Run("Missing token (Enabled)", func(t *testing.T) {
-		cfg := &AuthConfig{
+		cfg := &Config{
 			enabled: true,
-			Verifier: &mockVerifier{verifyFunc: func(ctx context.Context, rawIDToken string) (*oidc.IDToken, error) {
+			verifier: &mockVerifier{verifyFunc: func(ctx context.Context, rawIDToken string) (*oidc.IDToken, error) {
 				return nil, context.Canceled // Just some error
 			}},
 		}

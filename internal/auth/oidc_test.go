@@ -6,29 +6,33 @@ import (
 
 func TestNewAuthConfig(t *testing.T) {
 	tests := []struct {
-		name         string
-		env          map[string]string
-		wantEnabled  bool
-		wantIssuer   string
-		wantAudience string
+		name            string
+		env             map[string]string
+		wantEnabled     bool
+		wantIssuer      string
+		wantAudience    string
+		wantMCPClientID string
 	}{
 		{
 			name: "All variables unset",
 			env: map[string]string{
-				"OIDC_ISSUER":    "",
-				"OIDC_CLIENT_ID": "",
+				"OIDC_ISSUER":        "",
+				"OIDC_MCP_CLIENT_ID": "",
+				"OIDC_AUDIENCE":      "",
 			},
 			wantEnabled: false,
 		},
 		{
 			name: "All variables set",
 			env: map[string]string{
-				"OIDC_ISSUER":    "https://issuer.com",
-				"OIDC_CLIENT_ID": "audience",
+				"OIDC_ISSUER":        "https://issuer.com",
+				"OIDC_MCP_CLIENT_ID": "client-id",
+				"OIDC_AUDIENCE":      "audience",
 			},
-			wantEnabled:  true,
-			wantIssuer:   "https://issuer.com",
-			wantAudience: "audience",
+			wantEnabled:     true,
+			wantIssuer:      "https://issuer.com",
+			wantAudience:    "audience",
+			wantMCPClientID: "client-id",
 		},
 		{
 			name: "Only Issuer set",
@@ -38,31 +42,17 @@ func TestNewAuthConfig(t *testing.T) {
 			wantEnabled: false,
 		},
 		{
-			name: "Only Audience set",
+			name: "Only MCP Client ID set",
 			env: map[string]string{
-				"OIDC_CLIENT_ID": "audience",
-			},
-			wantEnabled: false,
-		},
-		{
-			name: "Only Issuer set",
-			env: map[string]string{
-				"OIDC_ISSUER": "https://issuer.com",
-			},
-			wantEnabled: false,
-		},
-		{
-			name: "Only Audience set",
-			env: map[string]string{
-				"OIDC_CLIENT_ID": "audience",
+				"OIDC_MCP_CLIENT_ID": "client-id",
 			},
 			wantEnabled: false,
 		},
 		{
 			name: "Whitespace variables",
 			env: map[string]string{
-				"OIDC_ISSUER":   "   ",
-				"OIDC_AUDIENCE": "   ",
+				"OIDC_ISSUER":        "   ",
+				"OIDC_MCP_CLIENT_ID": "   ",
 			},
 			wantEnabled: false,
 		},
@@ -75,7 +65,8 @@ func TestNewAuthConfig(t *testing.T) {
 			}
 			// Clear relevant env vars first to ensure clean state
 			t.Setenv("OIDC_ISSUER", "")
-			t.Setenv("OIDC_CLIENT_ID", "")
+			t.Setenv("OIDC_MCP_CLIENT_ID", "")
+			t.Setenv("OIDC_AUDIENCE", "")
 
 			for k, v := range tt.env {
 				t.Setenv(k, v)
@@ -90,6 +81,38 @@ func TestNewAuthConfig(t *testing.T) {
 			if cfg.Enabled() != tt.wantEnabled {
 				t.Errorf("NewAuthConfig() Enabled = %v, want %v", cfg.Enabled(), tt.wantEnabled)
 			}
+
+			if tt.wantEnabled {
+				if cfg.Issuer() != tt.wantIssuer {
+					t.Errorf("NewAuthConfig() Issuer = %v, want %v", cfg.Issuer(), tt.wantIssuer)
+				}
+				if cfg.Audience() != tt.wantAudience {
+					t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.Audience(), tt.wantAudience)
+				}
+				if cfg.MCPClientID() != tt.wantMCPClientID {
+					t.Errorf("NewAuthConfig() MCPClientId = %v, want %v", cfg.MCPClientID(), tt.wantMCPClientID)
+				}
+			}
 		})
+	}
+}
+
+func TestAuthConfigGetters(t *testing.T) {
+	cfg := NewTestAuthConfig(true, "issuer", "audience", "client")
+
+	if !cfg.Enabled() {
+		t.Error("Enabled() should be true")
+	}
+	if cfg.Issuer() != "issuer" {
+		t.Errorf("Issuer() = %v, want issuer", cfg.Issuer())
+	}
+	if cfg.Audience() != "audience" {
+		t.Errorf("Audience() = %v, want audience", cfg.Audience())
+	}
+	if cfg.MCPClientID() != "client" {
+		t.Errorf("MCPClientId() = %v, want client", cfg.MCPClientID())
+	}
+	if cfg.Verifier() != nil {
+		t.Error("Verifier() should be nil in test config without manual set")
 	}
 }

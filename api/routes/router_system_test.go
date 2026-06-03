@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"service-atlas/internal/auth"
 	"testing"
 	"time"
 
@@ -13,7 +14,8 @@ import (
 // helper to create a router with system calls registered
 func newSystemRouter() *chi.Mux {
 	r := chi.NewRouter()
-	setupSystemCalls(r)
+	cfg := &auth.Config{}
+	setupSystemCalls(r, cfg)
 	return r
 }
 
@@ -104,5 +106,30 @@ func TestSetupSystemCalls_Health(t *testing.T) {
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("/health expected status 200, got %d", rr.Code)
+	}
+}
+
+func TestSetupSystemCalls_MCPConfig(t *testing.T) {
+	router := newSystemRouter()
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/mcp/config", nil)
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("/auth/mcp/config expected status 200, got %d", rr.Code)
+	}
+
+	var resp struct {
+		AuthMode string `json:"auth_mode"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("/auth/mcp/config failed to unmarshal JSON: %v", err)
+	}
+
+	// Default should be disabled because newSystemRouter uses empty auth.Config
+	if resp.AuthMode != "none" {
+		t.Fatalf("/auth/mcp/config expected auth_mode 'none', got %q", resp.AuthMode)
 	}
 }

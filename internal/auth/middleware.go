@@ -33,8 +33,8 @@ func NameFromContext(ctx context.Context) string {
 	return ""
 }
 
-func Middleware(authCfg *AuthConfig) func(http.Handler) http.Handler {
-	if !authCfg.Enabled() || authCfg.Verifier == nil {
+func Middleware(authCfg *Config) func(http.Handler) http.Handler {
+	if !authCfg.Enabled() || authCfg.Verifier() == nil {
 		return func(next http.Handler) http.Handler {
 			return next
 		}
@@ -48,7 +48,7 @@ func Middleware(authCfg *AuthConfig) func(http.Handler) http.Handler {
 				http.Error(w, "Unauthorized: missing or invalid token", http.StatusUnauthorized)
 				return
 			}
-			token, err := authCfg.Verifier.Verify(r.Context(), rawToken)
+			token, err := authCfg.Verifier().Verify(r.Context(), rawToken)
 			if err != nil {
 				http.Error(w, "Failed to verify token", http.StatusUnauthorized)
 				return

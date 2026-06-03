@@ -1,0 +1,15 @@
+meta {
+  name: MCP Config
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/auth/mcp/config
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
