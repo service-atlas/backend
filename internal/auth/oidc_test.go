@@ -89,8 +89,8 @@ func TestNewAuthConfig(t *testing.T) {
 				if cfg.Audience() != tt.wantAudience {
 					t.Errorf("NewAuthConfig() Audience = %v, want %v", cfg.Audience(), tt.wantAudience)
 				}
-				if cfg.MCPClientId() != tt.wantMCPClientID {
-					t.Errorf("NewAuthConfig() MCPClientId = %v, want %v", cfg.MCPClientId(), tt.wantMCPClientID)
+				if cfg.MCPClientID() != tt.wantMCPClientID {
+					t.Errorf("NewAuthConfig() MCPClientId = %v, want %v", cfg.MCPClientID(), tt.wantMCPClientID)
 				}
 			}
 		})
@@ -109,8 +109,8 @@ func TestAuthConfigGetters(t *testing.T) {
 	if cfg.Audience() != "audience" {
 		t.Errorf("Audience() = %v, want audience", cfg.Audience())
 	}
-	if cfg.MCPClientId() != "client" {
-		t.Errorf("MCPClientId() = %v, want client", cfg.MCPClientId())
+	if cfg.MCPClientID() != "client" {
+		t.Errorf("MCPClientId() = %v, want client", cfg.MCPClientID())
 	}
 	if cfg.Verifier() != nil {
 		t.Error("Verifier() should be nil in test config without manual set")

@@ -25,7 +25,7 @@ func (cfg *Config) Verifier() TokenVerifier {
 func (cfg *Config) Enabled() bool {
 	return cfg.enabled
 }
-func (cfg *Config) MCPClientId() string {
+func (cfg *Config) MCPClientID() string {
 	return cfg.mcpClientID
 }
 func (cfg *Config) Audience() string {

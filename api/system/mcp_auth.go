@@ -34,7 +34,7 @@ func CreateMCPAuthEndpoint(cfg *auth.Config) func(w http.ResponseWriter, r *http
 			resp.AuthMode = MCPAuthModeEnabled
 			resp.OIDC = &MCPOIDCInfo{
 				Issuer:   cfg.Issuer(),
-				ClientID: cfg.MCPClientId(),
+				ClientID: cfg.MCPClientID(),
 				Audience: cfg.Audience(),
 			}
 			if resp.OIDC.ClientID == "" {
