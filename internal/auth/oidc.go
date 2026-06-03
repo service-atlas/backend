@@ -16,7 +16,7 @@ type Config struct {
 	verifier    TokenVerifier
 	issuer      string
 	audience    string
-	mcpClientId string
+	mcpClientID string
 }
 
 func (cfg *Config) Verifier() TokenVerifier {
@@ -26,7 +26,7 @@ func (cfg *Config) Enabled() bool {
 	return cfg.enabled
 }
 func (cfg *Config) MCPClientId() string {
-	return cfg.mcpClientId
+	return cfg.mcpClientID
 }
 func (cfg *Config) Audience() string {
 	return cfg.audience
@@ -35,12 +35,12 @@ func (cfg *Config) Issuer() string {
 	return cfg.issuer
 }
 
-func NewTestAuthConfig(enabled bool, issuer, audience, mcpClientId string) *Config {
+func NewTestAuthConfig(enabled bool, issuer, audience, mcpClientID string) *Config {
 	return &Config{
 		enabled:     enabled,
 		issuer:      issuer,
 		audience:    audience,
-		mcpClientId: mcpClientId,
+		mcpClientID: mcpClientID,
 	}
 }
 
@@ -53,7 +53,7 @@ func NewAuthConfig() (*Config, error) {
 		enabled:     true,
 		issuer:      oidcIssuer,
 		audience:    oidcAudience,
-		mcpClientId: oidcClientId,
+		mcpClientID: oidcClientId,
 	}
 
 	if len(oidcIssuer) == 0 || len(oidcClientId) == 0 {
