@@ -11,21 +11,49 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 )
 
-type AuthConfig struct {
-	enabled  bool
-	Verifier TokenVerifier
+type Config struct {
+	enabled     bool
+	verifier    TokenVerifier
+	issuer      string
+	audience    string
+	mcpClientId string
 }
 
-func (cfg *AuthConfig) Enabled() bool {
+func (cfg *Config) Verifier() TokenVerifier {
+	return cfg.verifier
+}
+func (cfg *Config) Enabled() bool {
 	return cfg.enabled
 }
+func (cfg *Config) MCPClientId() string {
+	return cfg.mcpClientId
+}
+func (cfg *Config) Audience() string {
+	return cfg.audience
+}
+func (cfg *Config) Issuer() string {
+	return cfg.issuer
+}
 
-func NewAuthConfig() (*AuthConfig, error) {
+func NewTestAuthConfig(enabled bool, issuer, audience, mcpClientId string) *Config {
+	return &Config{
+		enabled:     enabled,
+		issuer:      issuer,
+		audience:    audience,
+		mcpClientId: mcpClientId,
+	}
+}
+
+func NewAuthConfig() (*Config, error) {
 	oidcIssuer := strings.TrimSpace(os.Getenv("OIDC_ISSUER"))
-	oidcClientId := strings.TrimSpace(os.Getenv("OIDC_CLIENT_ID"))
+	oidcClientId := strings.TrimSpace(os.Getenv("OIDC_MCP_CLIENT_ID"))
+	oidcAudience := strings.TrimSpace(os.Getenv("OIDC_AUDIENCE"))
 
-	cfg := AuthConfig{
-		enabled: true,
+	cfg := Config{
+		enabled:     true,
+		issuer:      oidcIssuer,
+		audience:    oidcAudience,
+		mcpClientId: oidcClientId,
 	}
 
 	if len(oidcIssuer) == 0 || len(oidcClientId) == 0 {
@@ -47,7 +75,7 @@ func NewAuthConfig() (*AuthConfig, error) {
 	slog.Info("OIDC authentication enabled",
 		slog.String("issuer", oidcIssuer),
 		slog.String("client_id", oidcClientId))
-	cfg.Verifier = oidcProvider.Verifier(&oidc.Config{ClientID: oidcClientId})
+	cfg.verifier = oidcProvider.Verifier(&oidc.Config{ClientID: oidcAudience})
 
 	return &cfg, nil
 }
