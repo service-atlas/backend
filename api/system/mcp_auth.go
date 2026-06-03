@@ -38,13 +38,14 @@ func CreateMCPAuthEndpoint(cfg *auth.Config) func(w http.ResponseWriter, r *http
 				Audience: cfg.Audience(),
 			}
 			if resp.OIDC.ClientID == "" {
-				resp.AuthMode = MCPAuthModeNone
+				resp.AuthMode = MCPAuthModeDisabled
 				resp.Reason = "OIDC client ID not set"
 				resp.OIDC = nil
 			}
 		} else {
-			resp.AuthMode = MCPAuthModeDisabled
+			resp.AuthMode = MCPAuthModeNone
 		}
+		w.Header().Set("Content-Type", "application/json")
 
 		encoder := json.NewEncoder(w)
 
@@ -52,5 +53,6 @@ func CreateMCPAuthEndpoint(cfg *auth.Config) func(w http.ResponseWriter, r *http
 			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 			return
 		}
+
 	}
 }

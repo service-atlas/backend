@@ -33,7 +33,7 @@ func TestCreateMCPAuthEndpoint(t *testing.T) {
 			cfg:            auth.NewTestAuthConfig(false, "", "", ""),
 			expectedStatus: http.StatusOK,
 			expectedBody: MCPAuthConfigResponse{
-				AuthMode: MCPAuthModeDisabled,
+				AuthMode: MCPAuthModeNone,
 			},
 		},
 		{
@@ -41,7 +41,7 @@ func TestCreateMCPAuthEndpoint(t *testing.T) {
 			cfg:            auth.NewTestAuthConfig(true, "https://issuer", "audience", ""),
 			expectedStatus: http.StatusOK,
 			expectedBody: MCPAuthConfigResponse{
-				AuthMode: MCPAuthModeNone,
+				AuthMode: MCPAuthModeDisabled,
 				Reason:   "OIDC client ID not set",
 			},
 		},

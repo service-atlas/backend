@@ -56,7 +56,7 @@ func NewAuthConfig() (*Config, error) {
 		mcpClientID: oidcClientId,
 	}
 
-	if len(oidcIssuer) == 0 || len(oidcClientId) == 0 {
+	if len(oidcIssuer) == 0 || len(oidcAudience) == 0 {
 		cfg.enabled = false
 		slog.Info("OIDC authentication disabled")
 		return &cfg, nil
@@ -74,7 +74,7 @@ func NewAuthConfig() (*Config, error) {
 	}
 	slog.Info("OIDC authentication enabled",
 		slog.String("issuer", oidcIssuer),
-		slog.String("client_id", oidcClientId))
+		slog.String("audience", oidcAudience))
 	cfg.verifier = oidcProvider.Verifier(&oidc.Config{ClientID: oidcAudience})
 
 	return &cfg, nil

@@ -129,7 +129,7 @@ func TestSetupSystemCalls_MCPConfig(t *testing.T) {
 	}
 
 	// Default should be disabled because newSystemRouter uses empty auth.Config
-	if resp.AuthMode != "disabled" {
-		t.Fatalf("/auth/mcp/config expected auth_mode 'disabled', got %q", resp.AuthMode)
+	if resp.AuthMode != "none" {
+		t.Fatalf("/auth/mcp/config expected auth_mode 'none', got %q", resp.AuthMode)
 	}
 }
