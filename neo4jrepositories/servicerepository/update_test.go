@@ -3,6 +3,7 @@ package servicerepository
 import (
 	"context"
 	"errors"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/customerrors"
 	nRepo "service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
@@ -116,6 +117,69 @@ func TestNeo4jServiceRepository_UpdateService_Success(t *testing.T) {
 		}
 	} else {
 		t.Fatalf("expected non-nil impact_domain")
+	}
+}
+
+func TestNeo4jServiceRepository_UpdateService_WithUpdatedBy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	ctx := auth.ContextWithName(context.Background(), "Jane Doe")
+
+	tc, err := nRepo.NewTestContainerHelper(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = tc.Container.Terminate(ctx) })
+
+	driver, err := neo4j.NewDriverWithContext(tc.Endpoint, neo4j.BasicAuth("neo4j", "letmein!", ""))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = driver.Close(ctx) }()
+
+	repo := New(driver)
+
+	// Arrange: create a service
+	createdID, err := repo.CreateService(ctx, repositories.Service{
+		Name:        "svc-update-by",
+		Description: "before",
+		ServiceType: "api",
+		Tier:        1,
+	})
+	if err != nil {
+		t.Fatalf("CreateService error: %v", err)
+	}
+
+	// Act: update service fields
+	u := repositories.Service{
+		Id:               createdID,
+		Name:             "svc-updated-by",
+		Description:      "after",
+		ServiceType:      "worker",
+		Tier:             2,
+		ArchitectureRole: "infrastructure",
+	}
+	if err := repo.UpdateService(ctx, u); err != nil {
+		t.Fatalf("UpdateService returned error: %v", err)
+	}
+
+	// Assert: updatedBy set
+	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer func() { _ = read.Close(ctx) }()
+	res, err := read.Run(ctx,
+		"MATCH (s:Service {id: $id}) RETURN s.updatedBy AS updatedBy",
+		map[string]any{"id": createdID},
+	)
+	if err != nil {
+		t.Fatalf("failed to verify updated service: %v", err)
+	}
+	rec, err := res.Single(ctx)
+	if err != nil {
+		t.Fatalf("expected single record verifying update: %v", err)
+	}
+	if ub, _ := rec.Get("updatedBy"); ub != "Jane Doe" {
+		t.Fatalf("expected updatedBy %q, got %q", "Jane Doe", ub)
 	}
 }
 

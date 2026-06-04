@@ -3,6 +3,7 @@ package servicerepository
 import (
 	"context"
 	"errors"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 	"strings"
@@ -11,6 +12,7 @@ import (
 )
 
 func (d *Neo4jServiceRepository) UpdateService(ctx context.Context, service repositories.Service) (err error) {
+	updatedBy := auth.NameFromContext(ctx)
 	updateServiceTransaction := func(tx neo4j.ManagedTransaction) (any, error) {
 		// First check if the service exists
 		result, err := tx.Run(ctx, `
@@ -33,21 +35,7 @@ func (d *Neo4jServiceRepository) UpdateService(ctx context.Context, service repo
 			}
 		}
 		// Service exists, update it
-		updateResult, updateErr := tx.Run(ctx, `
-			MATCH (s:Service)
-			WHERE s.id = $id
-			SET s.name = $name, 
-				s.type = $type, 
-				s.description = $description,
-				s.url = $url,
-				s.tier = $tier,
-				s.architecture_role = $architecture_role,
-				s.exposure = $exposure,
-				s.impact_domain = $impact_domain,
-				s.updated = datetime()
-			RETURN s
-		`, map[string]any{
-			"id":                service.Id,
+		props := map[string]any{
 			"name":              service.Name,
 			"type":              strings.ToUpper(service.ServiceType),
 			"description":       service.Description,
@@ -56,6 +44,20 @@ func (d *Neo4jServiceRepository) UpdateService(ctx context.Context, service repo
 			"architecture_role": service.ArchitectureRole,
 			"exposure":          service.Exposure,
 			"impact_domain":     service.ImpactDomain,
+		}
+		if updatedBy != "" {
+			props["updatedBy"] = updatedBy
+		}
+
+		updateResult, updateErr := tx.Run(ctx, `
+			MATCH (s:Service)
+			WHERE s.id = $id
+			SET s += $props
+			SET s.updated = datetime()
+			RETURN s
+		`, map[string]any{
+			"id":    service.Id,
+			"props": props,
 		})
 
 		if updateErr != nil {

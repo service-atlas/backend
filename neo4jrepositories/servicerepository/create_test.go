@@ -2,6 +2,7 @@ package servicerepository
 
 import (
 	"context"
+	"service-atlas/internal/auth"
 	nRepo "service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
 	"strings"
@@ -103,5 +104,60 @@ func TestNeo4jServiceRepository_CreateService_Success(t *testing.T) {
 		}
 	} else {
 		t.Fatalf("expected non-nil impact_domain")
+	}
+}
+
+func TestNeo4jServiceRepository_CreateService_WithCreatedBy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	ctx := auth.ContextWithName(context.Background(), "John Doe")
+
+	// Start Neo4j test container
+	tc, err := nRepo.NewTestContainerHelper(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = tc.Container.Terminate(ctx) })
+
+	// Connect driver
+	driver, err := neo4j.NewDriverWithContext(tc.Endpoint, neo4j.BasicAuth("neo4j", "letmein!", ""))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = driver.Close(ctx) }()
+
+	repo := New(driver)
+
+	// Act: create service
+	input := repositories.Service{
+		Name:             "svc-created-by",
+		Description:      "created service with creator",
+		ServiceType:      "api",
+		Tier:             1,
+		ArchitectureRole: "application",
+		Exposure:         "public",
+	}
+	id, err := repo.CreateService(ctx, input)
+	if err != nil {
+		t.Fatalf("CreateService returned error: %v", err)
+	}
+
+	// Assert: node exists with expected properties
+	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer func() { _ = read.Close(ctx) }()
+	res, err := read.Run(ctx,
+		"MATCH (s:Service {id: $id}) RETURN s.createdBy AS createdBy",
+		map[string]any{"id": id},
+	)
+	if err != nil {
+		t.Fatalf("failed to verify created service: %v", err)
+	}
+	rec, err := res.Single(ctx)
+	if err != nil {
+		t.Fatalf("expected single record verifying service: %v", err)
+	}
+	if cb, _ := rec.Get("createdBy"); cb != "John Doe" {
+		t.Fatalf("expected createdBy %q, got %q", "John Doe", cb)
 	}
 }
