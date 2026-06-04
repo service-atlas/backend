@@ -33,6 +33,10 @@ func NameFromContext(ctx context.Context) string {
 	return ""
 }
 
+func ContextWithName(ctx context.Context, name string) context.Context {
+	return context.WithValue(ctx, nameContextKey{}, name)
+}
+
 func Middleware(authCfg *Config) func(http.Handler) http.Handler {
 	if !authCfg.Enabled() || authCfg.Verifier() == nil {
 		return func(next http.Handler) http.Handler {
@@ -60,11 +64,11 @@ func Middleware(authCfg *Config) func(http.Handler) http.Handler {
 			}
 			nameCtx := r.Context()
 			if claims.Name != "" {
-				nameCtx = context.WithValue(r.Context(), nameContextKey{}, claims.Name)
+				nameCtx = ContextWithName(r.Context(), claims.Name)
 			} else if claims.Email != "" {
-				nameCtx = context.WithValue(r.Context(), nameContextKey{}, claims.Email)
+				nameCtx = ContextWithName(r.Context(), claims.Email)
 			} else if token.Subject != "" {
-				nameCtx = context.WithValue(r.Context(), nameContextKey{}, token.Subject)
+				nameCtx = ContextWithName(r.Context(), token.Subject)
 			}
 
 			next.ServeHTTP(w, r.WithContext(nameCtx))

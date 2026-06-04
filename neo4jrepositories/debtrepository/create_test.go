@@ -3,6 +3,7 @@ package debtrepository
 import (
 	"context"
 	"errors"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/customerrors"
 	"service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
@@ -68,9 +69,8 @@ func TestNeo4jDebtRepository_CreateDebtItem(t *testing.T) {
 	// Assert: debt node and relationship exist
 	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer func() { _ = read.Close(ctx) }()
-
 	res, err := read.Run(ctx,
-		"MATCH (s:Service {id: $sid})-[:OWNS]->(d:Debt) RETURN d.id as id, d.created as created, d.title as title, d.description as description, d.status as status, d.type as type",
+		"MATCH (s:Service {id: $sid})-[:OWNS]->(d:Debt) RETURN d.id as id, d.created as created, d.title as title, d.description as description, d.status as status, d.type as type, d.createdBy as createdBy",
 		map[string]any{"sid": serviceID},
 	)
 	if err != nil {
@@ -97,6 +97,82 @@ func TestNeo4jDebtRepository_CreateDebtItem(t *testing.T) {
 	}
 	if created, _ := rec.Get("created"); created == nil {
 		t.Errorf("expected non-nil created, got %#v", created)
+	}
+	if createdBy, _ := rec.Get("createdBy"); createdBy != nil {
+		t.Errorf("expected createdBy to be nil, got %#v", createdBy)
+	}
+}
+
+func TestNeo4jDebtRepository_CreateDebtItem_WithCreatedBy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	ctx := auth.ContextWithName(context.Background(), "John Doe")
+
+	// Start Neo4j test container
+	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = tc.Container.Terminate(ctx)
+	})
+
+	// Connect driver
+	driver, err := neo4j.NewDriverWithContext(
+		tc.Endpoint,
+		neo4j.BasicAuth("neo4j", "letmein!", ""),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = driver.Close(ctx) }()
+
+	repo := New(driver)
+
+	// Arrange: create Service
+	serviceID := "55555555-5555-5555-5555-555555555555"
+
+	write := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer func() { _ = write.Close(ctx) }()
+
+	if _, err = write.Run(ctx,
+		"CREATE (s:Service {id: $sid, name: $sname}) RETURN s",
+		map[string]any{"sid": serviceID, "sname": "test-service-2"},
+	); err != nil {
+		t.Fatalf("failed to create service node: %v", err)
+	}
+
+	d := repositories.Debt{
+		Type:        "debt",
+		Title:       "Test Debt with Creator",
+		Description: "This is a test debt created by someone",
+		ServiceId:   serviceID,
+	}
+
+	// Act
+	if err := repo.CreateDebtItem(ctx, d); err != nil {
+		t.Fatalf("CreateDebtItem returned error: %v", err)
+	}
+
+	// Assert: debt node and relationship exist
+	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer func() { _ = read.Close(ctx) }()
+
+	res, err := read.Run(ctx,
+		"MATCH (s:Service {id: $sid})-[:OWNS]->(d:Debt) RETURN d.id as id, d.createdBy as createdBy",
+		map[string]any{"sid": serviceID},
+	)
+	if err != nil {
+		t.Fatalf("failed to verify debt creation: %v", err)
+	}
+	rec, err := res.Single(ctx)
+	if err != nil || rec == nil {
+		t.Fatalf("expected single record verifying debt creation, got err=%v", err)
+	}
+	if cb, _ := rec.Get("createdBy"); cb != "John Doe" {
+		t.Errorf("expected createdBy %q, got %q", "John Doe", cb)
 	}
 }
 
