@@ -11,7 +11,7 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-func TestNeo4jTeamRepository_UpdateTeam(t *testing.T) {
+func TestUpdateTeam(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
@@ -93,7 +93,7 @@ func TestNeo4jTeamRepository_UpdateTeam(t *testing.T) {
 
 }
 
-func TestNeo4jTeamRepository_UpdateTeam_WithUpdatedBy(t *testing.T) {
+func TestUpdateTeam_WithUpdatedBy(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}

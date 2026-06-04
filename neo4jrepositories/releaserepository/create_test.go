@@ -3,6 +3,7 @@ package releaserepository
 import (
 	"context"
 	"errors"
+	"service-atlas/internal/auth"
 	"testing"
 	"time"
 
@@ -85,6 +86,65 @@ func TestNeo4jReleaseRepository_CreateRelease_Success(t *testing.T) {
 	}
 	if ver, _ := rec.Get("version"); ver != rel.Version {
 		t.Fatalf("expected version %q, got %#v", rel.Version, ver)
+	}
+}
+
+func TestNeo4jReleaseRepository_CreateRelease_WithCreatedBy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	ctx := auth.ContextWithName(context.Background(), "John Doe")
+
+	// Start Neo4j test container
+	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = tc.Container.Terminate(ctx) })
+
+	// Connect driver
+	driver, err := neo4j.NewDriverWithContext(tc.Endpoint, neo4j.BasicAuth("neo4j", "letmein!", ""))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = driver.Close(ctx) }()
+
+	repo := New(driver)
+
+	// Arrange: create a Service node
+	serviceID := "22222222-2222-2222-2222-222222222222"
+	write := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer func() { _ = write.Close(ctx) }()
+	_, err = write.Run(ctx, "CREATE (s:Service {id: $id, name: 'svc-release-cb'}) RETURN s", map[string]any{"id": serviceID})
+	if err != nil {
+		t.Fatalf("failed to create service: %v", err)
+	}
+
+	// Act: create a Release
+	rel := repositories.Release{
+		ServiceId:   serviceID,
+		ReleaseDate: time.Now().UTC(),
+	}
+	if err := repo.CreateRelease(ctx, rel); err != nil {
+		t.Fatalf("CreateRelease returned error: %v", err)
+	}
+
+	// Assert: Release node exists and createdBy is set
+	read := driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer func() { _ = read.Close(ctx) }()
+	res, err := read.Run(ctx,
+		"MATCH (:Service {id: $sid})-[:RELEASED]->(r:Release) RETURN r.createdBy AS createdBy",
+		map[string]any{"sid": serviceID},
+	)
+	if err != nil {
+		t.Fatalf("verify query error: %v", err)
+	}
+	rec, err := res.Single(ctx)
+	if err != nil {
+		t.Fatalf("expected single release record: %v", err)
+	}
+	if cb, _ := rec.Get("createdBy"); cb != "John Doe" {
+		t.Fatalf("expected createdBy %q, got %q", "John Doe", cb)
 	}
 }
 

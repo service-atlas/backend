@@ -13,7 +13,7 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-func TestNeo4jServiceRepository_UpdateService_Success(t *testing.T) {
+func TestUpdateService(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
@@ -120,7 +120,7 @@ func TestNeo4jServiceRepository_UpdateService_Success(t *testing.T) {
 	}
 }
 
-func TestNeo4jServiceRepository_UpdateService_WithUpdatedBy(t *testing.T) {
+func TestUpdateService_WithUpdatedBy(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
