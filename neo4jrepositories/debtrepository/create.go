@@ -3,6 +3,7 @@ package debtrepository
 import (
 	"context"
 	"fmt"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 
@@ -10,6 +11,7 @@ import (
 )
 
 func (n Neo4jDebtRepository) CreateDebtItem(ctx context.Context, debt repositories.Debt) error {
+	createdBy := auth.NameFromContext(ctx)
 	createDebtTransaction := func(tx neo4j.ManagedTransaction) (any, error) {
 		// Check if the service exists
 		checkQuery := `
@@ -34,17 +36,31 @@ func (n Neo4jDebtRepository) CreateDebtItem(ctx context.Context, debt repositori
 				Msg:    fmt.Sprintf("Service not found: %s", debt.ServiceId),
 			}
 		}
-		_, err = tx.Run(ctx, `
+
+		cypher := `
 				MATCH (s:Service {id: $serviceId})
-				CREATE (n:Debt {id: randomuuid(), created: datetime(), title: $title, type: $type, description: $description, status: $status})
-				CREATE (s)-[r:OWNS]->(n)
-        `, map[string]any{
+				CREATE (n:Debt)
+				SET n = $props
+				SET n.id = randomuuid(), n.created = datetime()
+				CREATE (s)-[:OWNS]->(n)
+        `
+		props := map[string]any{
 			"title":       debt.Title,
 			"type":        debt.Type,
 			"description": debt.Description,
 			"status":      DefaultStatus,
-			"serviceId":   debt.ServiceId,
-		})
+		}
+
+		if createdBy != "" {
+			props["createdBy"] = createdBy
+		}
+
+		params := map[string]any{
+			"serviceId": debt.ServiceId,
+			"props":     props,
+		}
+
+		_, err = tx.Run(ctx, cypher, params)
 		return nil, err
 	}
 	_, err := n.manager.ExecuteWrite(ctx, createDebtTransaction)
