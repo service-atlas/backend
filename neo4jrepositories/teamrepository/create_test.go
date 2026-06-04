@@ -2,6 +2,7 @@ package teamrepository
 
 import (
 	"context"
+	"service-atlas/internal/auth"
 	"service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
 	"testing"
@@ -107,5 +108,62 @@ func TestNeo4jTeamRepository_CreateTeam(t *testing.T) {
 	// Bounds check to avoid flaky exact-equality time comparisons
 	if createdTime.Before(now) || createdTime.After(now.Add(10*time.Second)) {
 		t.Errorf("expected 'created' between %s and %s, got %s", now, now.Add(10*time.Second), createdTime)
+	}
+}
+
+func TestNeo4jTeamRepository_CreateTeam_WithCreatedBy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	ctx := auth.ContextWithName(context.Background(), "John Doe")
+	tc, err := neo4jrepositories.NewTestContainerHelper(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = tc.Container.Terminate(ctx)
+	})
+
+	driver, err := neo4j.NewDriverWithContext(
+		tc.Endpoint,
+		neo4j.BasicAuth("neo4j", "letmein!", ""))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		_ = driver.Close(ctx)
+	}()
+	repo := New(driver)
+	team := repositories.Team{
+		Name: "test-created-by",
+	}
+	_, err = repo.CreateTeam(ctx, team)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session := driver.NewSession(ctx, neo4j.SessionConfig{
+		AccessMode: neo4j.AccessModeRead,
+	})
+
+	defer func() {
+		_ = session.Close(ctx)
+	}()
+
+	result, err := session.Run(ctx,
+		"MATCH (n:Team {name: $name}) RETURN n.createdBy as createdBy",
+		map[string]any{"name": team.Name},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	record, err := result.Single(ctx)
+	if err != nil || record == nil {
+		t.Fatalf("expected single team record, got error: %v", err)
+	}
+
+	cbVal, _ := record.Get("createdBy")
+	if cbVal != "John Doe" {
+		t.Errorf("expected createdBy %q, got %q", "John Doe", cbVal)
 	}
 }

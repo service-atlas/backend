@@ -3,6 +3,7 @@ package teamrepository
 import (
 	"context"
 	"net/http"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/customerrors"
 
 	"service-atlas/repositories"
@@ -11,6 +12,7 @@ import (
 )
 
 func (r Neo4jTeamRepository) UpdateTeam(ctx context.Context, team repositories.Team) error {
+	updatedBy := auth.NameFromContext(ctx)
 	_, err := r.GetTeam(ctx, team.Id)
 	// Error should be a custom http error already
 	if err != nil {
@@ -18,15 +20,22 @@ func (r Neo4jTeamRepository) UpdateTeam(ctx context.Context, team repositories.T
 	}
 
 	updateTeamTransaction := func(tx neo4j.ManagedTransaction) (any, error) {
+		props := map[string]any{
+			"name": team.Name,
+		}
+		if updatedBy != "" {
+			props["updatedBy"] = updatedBy
+		}
+
 		updateResult, updateErr := tx.Run(ctx, `
 			MATCH (s:Team)
 			WHERE s.id = $id
-			SET s.name = $name,
+			SET s += $props,
 				s.updated = datetime()
 			RETURN s
 		`, map[string]any{
-			"id":   team.Id,
-			"name": team.Name,
+			"id":    team.Id,
+			"props": props,
 		})
 
 		if updateErr != nil {

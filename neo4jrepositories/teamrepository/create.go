@@ -3,6 +3,7 @@ package teamrepository
 import (
 	"context"
 	"net/http"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 
@@ -10,13 +11,23 @@ import (
 )
 
 func (r Neo4jTeamRepository) CreateTeam(ctx context.Context, team repositories.Team) (string, error) {
+	createdBy := auth.NameFromContext(ctx)
 	createTeamTransaction := func(tx neo4j.ManagedTransaction) (any, error) {
+		props := map[string]any{
+			"name": team.Name,
+		}
+		if createdBy != "" {
+			props["createdBy"] = createdBy
+		}
+
 		result, err := tx.Run(
 			ctx, `
-        CREATE (n: Team {id: randomuuid(), created: datetime(), updated: datetime(), name: $name})
+        CREATE (n: Team)
+        SET n = $props
+        SET n.id = randomuuid(), n.created = datetime(), n.updated = datetime()
         RETURN n.id AS id
         `, map[string]any{
-				"name": team.Name,
+				"props": props,
 			})
 		if err != nil {
 			return nil, err
