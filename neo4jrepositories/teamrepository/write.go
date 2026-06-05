@@ -65,3 +65,60 @@ func (r Neo4jTeamRepository) CreateTeam(ctx context.Context, team repositories.T
 	}
 	return id, nil
 }
+
+func (r Neo4jTeamRepository) UpdateTeam(ctx context.Context, team repositories.Team) error {
+	updatedBy := auth.NameFromContext(ctx)
+	_, err := r.GetTeam(ctx, team.Id)
+	// Error should be a custom http error already
+	if err != nil {
+		return err
+	}
+
+	updateTeamTransaction := func(tx neo4j.ManagedTransaction) (any, error) {
+		props := map[string]any{
+			"name": team.Name,
+		}
+		if updatedBy != "" {
+			props["updatedBy"] = updatedBy
+		}
+
+		updateResult, updateErr := tx.Run(ctx, `
+			MATCH (s:Team)
+			WHERE s.id = $id
+			SET s += $props,
+				s.updated = datetime()
+			RETURN s
+		`, map[string]any{
+			"id":    team.Id,
+			"props": props,
+		})
+
+		if updateErr != nil {
+			return nil, customerrors.HTTPError{
+				Status: http.StatusInternalServerError,
+				Msg:    updateErr.Error(),
+			}
+		}
+
+		// Confirm update was successful
+		if !updateResult.Next(ctx) {
+			if resultErr := updateResult.Err(); resultErr != nil {
+				return nil, customerrors.HTTPError{
+					Status: http.StatusInternalServerError,
+					Msg:    resultErr.Error(),
+				}
+			}
+			return nil, customerrors.HTTPError{
+				Status: http.StatusInternalServerError,
+				Msg:    "Failed to confirm update",
+			}
+		}
+		return nil, nil
+	}
+
+	_, err = r.manager.ExecuteWrite(ctx, updateTeamTransaction)
+	if err != nil {
+		return err
+	}
+	return nil
+}
