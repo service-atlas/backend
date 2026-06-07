@@ -106,8 +106,11 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 func setupCORS(r chi.Router) {
 	corsConfig := config.GetCORSConfig()
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: corsConfig.AllowedOrigins,
-		AllowedMethods: corsConfig.AllowedMethods,
+		AllowedOrigins:   corsConfig.AllowedOrigins,
+		AllowedMethods:   corsConfig.AllowedMethods,
+		AllowedHeaders:   corsConfig.AllowedHeaders,
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any major browser
 	}))
 }
 
