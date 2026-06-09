@@ -3,6 +3,7 @@ package releaserepository
 import (
 	"context"
 	"fmt"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 
@@ -10,6 +11,7 @@ import (
 )
 
 func (r *Neo4jReleaseRepository) CreateRelease(ctx context.Context, release repositories.Release) error {
+	createdBy := auth.NameFromContext(ctx)
 	createReleaseTransaction := func(tx neo4j.ManagedTransaction) (any, error) {
 		// Check if the service exists
 		checkQuery := `
@@ -35,27 +37,31 @@ func (r *Neo4jReleaseRepository) CreateRelease(ctx context.Context, release repo
 			}
 		}
 
-		params := map[string]any{
-			"serviceId":   release.ServiceId,
-			"releaseDate": release.ReleaseDate.Format(releaseTimeFormat),
+		props := map[string]any{
+			"releaseDate": release.ReleaseDate,
 		}
-		// Build the Cypher query dynamically
-		propertiesString := "releaseDate: datetime($releaseDate)"
 		if release.Url != "" {
-			propertiesString += ", url: $url"
-			params["url"] = release.Url
+			props["url"] = release.Url
 		}
 		if release.Version != "" {
-			propertiesString += ", version: $version"
-			params["version"] = release.Version
+			props["version"] = release.Version
+		}
+		if createdBy != "" {
+			props["createdBy"] = createdBy
 		}
 
-		query := fmt.Sprintf(`
+		query := `
 			MATCH (s:Service {id: $serviceId})
-			CREATE (r:Release {%s})
+			CREATE (r:Release)
+			SET r = $props
 			CREATE (s)-[rel:RELEASED]->(r)
 			RETURN r
-		`, propertiesString)
+		`
+
+		params := map[string]any{
+			"serviceId": release.ServiceId,
+			"props":     props,
+		}
 
 		_, err = tx.Run(ctx, query, params)
 		if err != nil {

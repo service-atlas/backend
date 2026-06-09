@@ -21,7 +21,7 @@ func (r Neo4jTeamRepository) GetTeam(ctx context.Context, teamId string) (*repos
 		})
 
 		if err != nil {
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusInternalServerError,
 				Msg:    err.Error(),
 			}
@@ -29,12 +29,12 @@ func (r Neo4jTeamRepository) GetTeam(ctx context.Context, teamId string) (*repos
 
 		if !result.Next(ctx) {
 			if err := result.Err(); err != nil {
-				return nil, customerrors.HTTPError{
+				return nil, &customerrors.HTTPError{
 					Status: http.StatusInternalServerError,
 					Msg:    err.Error(),
 				}
 			}
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusNotFound,
 				Msg:    "Team not found",
 			} // No team found with this ID
@@ -43,7 +43,7 @@ func (r Neo4jTeamRepository) GetTeam(ctx context.Context, teamId string) (*repos
 		record := result.Record()
 		node, ok := record.Get("s")
 		if !ok {
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusInternalServerError,
 				Msg:    "Failed to extract team node from query result",
 			}
@@ -51,14 +51,14 @@ func (r Neo4jTeamRepository) GetTeam(ctx context.Context, teamId string) (*repos
 
 		n, ok := node.(neo4j.Node)
 		if !ok {
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusInternalServerError,
 				Msg:    "Failed to convert query result to Node type",
 			}
 		}
 		t, ok := nRepo.MapNodeToTeam(n)
 		if !ok {
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusInternalServerError,
 				Msg:    "Failed to convert Node to Team type",
 			}
@@ -71,7 +71,7 @@ func (r Neo4jTeamRepository) GetTeam(ctx context.Context, teamId string) (*repos
 	}
 	team, ok := result.(repositories.Team)
 	if !ok {
-		return nil, customerrors.HTTPError{
+		return nil, &customerrors.HTTPError{
 			Status: http.StatusInternalServerError,
 			Msg:    "Error converting result to team",
 		}
@@ -95,14 +95,14 @@ func (r Neo4jTeamRepository) GetTeams(ctx context.Context, page, pageSize int) (
 			"limit": pageSize,
 		})
 		if err != nil {
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusInternalServerError,
 				Msg:    err.Error(),
 			}
 		}
 		records, err := result.Collect(ctx)
 		if err != nil {
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusInternalServerError,
 				Msg:    err.Error(),
 			}
@@ -127,14 +127,14 @@ func (r Neo4jTeamRepository) GetTeams(ctx context.Context, page, pageSize int) (
 	}
 	pagedResult, err := r.manager.ExecuteRead(ctx, getPageTransaction)
 	if err != nil {
-		return nil, customerrors.HTTPError{
+		return nil, &customerrors.HTTPError{
 			Status: http.StatusInternalServerError,
 			Msg:    err.Error(),
 		}
 	}
 	teams, ok := pagedResult.([]repositories.Team)
 	if !ok {
-		return nil, customerrors.HTTPError{
+		return nil, &customerrors.HTTPError{
 			Status: http.StatusInternalServerError,
 			Msg:    "unexpected return type from transaction",
 		}
