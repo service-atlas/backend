@@ -68,14 +68,16 @@ func (n Neo4jDebtRepository) CreateDebtItem(ctx context.Context, debt repositori
 }
 
 func (n Neo4jDebtRepository) UpdateStatus(ctx context.Context, id, status string) error {
+	updatedBy := auth.NameFromContext(ctx)
 	_, err := n.manager.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		result, err := tx.Run(ctx, `
 			MATCH (d:Debt {id: $id})
-			SET d.status = $status
+			SET d.status = $status, d.updated_by = $updatedBy
 			RETURN count(d) as updatedCount
 		`, map[string]any{
-			"id":     id,
-			"status": status,
+			"id":        id,
+			"status":    status,
+			"updatedBy": updatedBy,
 		})
 		if err != nil {
 			return nil, err

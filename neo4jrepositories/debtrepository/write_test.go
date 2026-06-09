@@ -281,15 +281,17 @@ func TestNeo4jDebtRepository_UpdateStatus_Success(t *testing.T) {
 	idVal, _ := rec.Get("id")
 	debtID := idVal.(string)
 
-	// Act: update status
+	// Act: update status with user in context
+	user := "tester-user"
+	userCtx := auth.ContextWithName(ctx, user)
 	newStatus := "remediated"
-	if err := repo.UpdateStatus(ctx, debtID, newStatus); err != nil {
+	if err := repo.UpdateStatus(userCtx, debtID, newStatus); err != nil {
 		t.Fatalf("UpdateStatus returned error: %v", err)
 	}
 
-	// Assert: status updated in DB
+	// Assert: status and updated_by updated in DB
 	check, err := read.Run(ctx,
-		"MATCH (d:Debt {id: $id}) RETURN d.status AS status",
+		"MATCH (d:Debt {id: $id}) RETURN d.status AS status, d.updated_by AS updatedBy",
 		map[string]any{"id": debtID},
 	)
 	if err != nil {
@@ -302,6 +304,10 @@ func TestNeo4jDebtRepository_UpdateStatus_Success(t *testing.T) {
 	st, _ := rec2.Get("status")
 	if st != newStatus {
 		t.Fatalf("expected status %q, got %q", newStatus, st)
+	}
+	ub, _ := rec2.Get("updatedBy")
+	if ub != user {
+		t.Fatalf("expected updatedBy %q, got %v", user, ub)
 	}
 }
 
