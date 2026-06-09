@@ -113,15 +113,15 @@ func (d *Neo4jServiceRepository) UpdateService(ctx context.Context, service repo
 		})
 
 		if updateErr != nil {
-			err = updateErr
+			return nil, updateErr
 		}
 
 		// Confirm update was successful
 		if !updateResult.Next(ctx) {
-			err = errors.New("update Service failed")
+			return nil, errors.New("update Service failed")
 		}
 
-		return nil, err
+		return nil, nil
 	}
 
 	_, execErr := d.manager.ExecuteWrite(ctx, updateServiceTransaction)
