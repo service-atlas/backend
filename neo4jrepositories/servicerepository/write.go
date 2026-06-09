@@ -38,19 +38,22 @@ func (d *Neo4jServiceRepository) CreateService(ctx context.Context, service repo
 				"props": props,
 			})
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		svc, err := result.Single(ctx)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		svcMap := svc.AsMap()
-		if svcId, ok := svcMap["id"]; ok {
-			if idStr, ok := svcId.(string); ok {
-				return idStr, err
-			}
+		svcId, ok := svcMap["id"]
+		if !ok {
+			return nil, errors.New("failed to extract id from created service: id key missing")
 		}
-		return "", err
+		idStr, ok := svcId.(string)
+		if !ok {
+			return nil, errors.New("failed to extract id from created service: id is not a string")
+		}
+		return idStr, nil
 
 	}
 	newId, insertErr := d.manager.ExecuteWrite(ctx, createServiceTransaction)
