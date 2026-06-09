@@ -256,30 +256,33 @@ The server listens on port 8080 by default.
 
 The API enables CORS via middleware. You can control allowed origins and methods via the `CORS_CONFIG` environment variable. If not set or invalid, the following default configuration is used:
 
-```
+```json
 {
   "AllowedOrigins": ["*"],
-  "AllowedMethods": ["GET", "POST", "PUT", "DELETE"]
+  "AllowedMethods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  "AllowedHeaders": ["Accept", "Authorization", "Content-Type", "X-CSRF-Token"],
+  "AllowCredentials": false
 }
 ```
 
 To provide a custom configuration, set `CORS_CONFIG` to a JSON string with the same shape. Examples:
 
-- Allow a single origin and limit methods to GET/OPTIONS:
+- Allow a single origin with credentials:
 
-```
-export CORS_CONFIG='{"AllowedOrigins":["https://example.com"],"AllowedMethods":["GET","OPTIONS"]}'
+```bash
+export CORS_CONFIG='{"AllowedOrigins":["https://example.com"],"AllowedMethods":["GET","OPTIONS"],"AllowCredentials":true}'
 ```
 
 - Allow multiple specific origins and common methods:
 
-```
-export CORS_CONFIG='{"AllowedOrigins":["https://app.example.com","https://admin.example.com"],"AllowedMethods":["GET","POST","PUT","DELETE","OPTIONS"]}'
+```bash
+export CORS_CONFIG='{"AllowedOrigins":["https://app.example.com","https://admin.example.com"],"AllowedMethods":["GET","POST","PUT","DELETE","OPTIONS"],"AllowCredentials":true}'
 ```
 
 Notes:
 - The value must be valid JSON; invalid JSON will be ignored and the default will be used.
 - `AllowedOrigins` accepts `"*"` to allow all origins or a list of exact origin URLs.
+- **Security Note**: If `AllowedOrigins` contains a wildcard (`*`), `AllowCredentials` will be automatically forced to `false` regardless of the configuration value to prevent unsafe cross-origin credential exposure.
 - Only the specified HTTP methods are allowed for CORS preflight and actual requests.
 
 ## API Endpoints

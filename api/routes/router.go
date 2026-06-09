@@ -109,7 +109,7 @@ func setupCORS(r chi.Router) {
 		AllowedOrigins:   corsConfig.AllowedOrigins,
 		AllowedMethods:   corsConfig.AllowedMethods,
 		AllowedHeaders:   corsConfig.AllowedHeaders,
-		AllowCredentials: true,
+		AllowCredentials: corsConfig.AllowCredentials,
 		MaxAge:           300, // Maximum value not ignored by any major browser
 	}))
 }
