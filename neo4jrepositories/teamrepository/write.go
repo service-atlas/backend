@@ -51,10 +51,7 @@ func (r Neo4jTeamRepository) CreateTeam(ctx context.Context, team repositories.T
 	}
 	result, err := r.manager.ExecuteWrite(ctx, createTeamTransaction)
 	if err != nil {
-		return "", &customerrors.HTTPError{
-			Status: http.StatusInternalServerError,
-			Msg:    "Error creating team",
-		}
+		return "", err
 	}
 	id, ok := result.(string)
 	if !ok {
@@ -94,7 +91,7 @@ func (r Neo4jTeamRepository) UpdateTeam(ctx context.Context, team repositories.T
 		})
 
 		if updateErr != nil {
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusInternalServerError,
 				Msg:    updateErr.Error(),
 			}
@@ -103,12 +100,12 @@ func (r Neo4jTeamRepository) UpdateTeam(ctx context.Context, team repositories.T
 		// Confirm update was successful
 		if !updateResult.Next(ctx) {
 			if resultErr := updateResult.Err(); resultErr != nil {
-				return nil, customerrors.HTTPError{
+				return nil, &customerrors.HTTPError{
 					Status: http.StatusInternalServerError,
 					Msg:    resultErr.Error(),
 				}
 			}
-			return nil, customerrors.HTTPError{
+			return nil, &customerrors.HTTPError{
 				Status: http.StatusInternalServerError,
 				Msg:    "Failed to confirm update",
 			}
