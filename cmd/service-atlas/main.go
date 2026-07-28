@@ -10,20 +10,20 @@ import (
 	"service-atlas/api/routes"
 	"service-atlas/api/system"
 	"service-atlas/internal/config"
-	"service-atlas/internal/secrets"
 	"service-atlas/neo4jrepositories"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
+	secrets "github.com/service-atlas/secrets-provider"
 )
 
 func main() {
 	ctx := context.Background()
 	logger := getLogger()
 	slog.SetDefault(logger)
-	secretsProvider, err := secrets.NewProvider(ctx)
+	secretsProvider, err := secrets.NewProvider()
 	if err != nil {
 		slog.Error("Error creating secrets provider: ", slog.Any("error", err))
 		os.Exit(1)
