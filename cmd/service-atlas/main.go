@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"service-atlas/api/routes"
 	"service-atlas/api/system"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/config"
 	"service-atlas/neo4jrepositories"
 	"strings"
@@ -33,9 +34,10 @@ func main() {
 		slog.Error("Error getting database info: ", slog.Any("error", err))
 		os.Exit(1)
 	}
+	tokenManager := auth.NewSecretProviderTokenManager(sProvider)
 	driver, err := neo4j.NewDriverWithContext(
 		dbInfo.URL,
-		neo4j.BasicAuth(dbInfo.Username, dbInfo.Password, ""))
+		tokenManager)
 	if err != nil {
 		slog.Error("Error creating driver: ", slog.Any("error", err))
 		os.Exit(1)
