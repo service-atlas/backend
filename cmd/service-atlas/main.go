@@ -16,14 +16,14 @@ import (
 	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
-	secrets "github.com/service-atlas/secrets-provider"
+	"github.com/service-atlas/secrets-provider"
 )
 
 func main() {
 	ctx := context.Background()
 	logger := getLogger()
 	slog.SetDefault(logger)
-	secretsProvider, err := secrets.NewProvider()
+	secretsProvider, err := secretsprovider.NewProvider()
 	if err != nil {
 		slog.Error("Error creating secrets provider: ", slog.Any("error", err))
 		os.Exit(1)
