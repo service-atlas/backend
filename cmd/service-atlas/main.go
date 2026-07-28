@@ -23,12 +23,12 @@ func main() {
 	ctx := context.Background()
 	logger := getLogger()
 	slog.SetDefault(logger)
-	secretsProvider, err := secretsprovider.NewProvider()
+	sProvider, err := secretsprovider.NewProvider()
 	if err != nil {
 		slog.Error("Error creating secrets provider: ", slog.Any("error", err))
 		os.Exit(1)
 	}
-	dbInfo, err := secretsProvider.GetDatabaseInfo(ctx)
+	dbInfo, err := sProvider.GetDatabaseInfo(ctx)
 	if err != nil {
 		slog.Error("Error getting database info: ", slog.Any("error", err))
 		os.Exit(1)
