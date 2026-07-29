@@ -3,7 +3,7 @@
 ########################
 # Build stage
 ########################
-FROM golang:1.26.1 AS builder
+FROM golang:1.26.5 AS builder
 LABEL authors="joshp"
 
 # Ensure modules are on and build is reproducible

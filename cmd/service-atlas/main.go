@@ -9,33 +9,35 @@ import (
 	"os/signal"
 	"service-atlas/api/routes"
 	"service-atlas/api/system"
+	"service-atlas/internal/auth"
 	"service-atlas/internal/config"
-	"service-atlas/internal/secrets"
 	"service-atlas/neo4jrepositories"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
+	"github.com/service-atlas/secrets-provider"
 )
 
 func main() {
 	ctx := context.Background()
 	logger := getLogger()
 	slog.SetDefault(logger)
-	secretsProvider, err := secrets.NewProvider(ctx)
+	sProvider, err := secretsprovider.NewProvider()
 	if err != nil {
 		slog.Error("Error creating secrets provider: ", slog.Any("error", err))
 		os.Exit(1)
 	}
-	dbInfo, err := secretsProvider.GetDatabaseInfo(ctx)
+	dbInfo, err := sProvider.GetDatabaseInfo(ctx)
 	if err != nil {
 		slog.Error("Error getting database info: ", slog.Any("error", err))
 		os.Exit(1)
 	}
+	tokenManager := auth.NewSecretProviderTokenManager(sProvider)
 	driver, err := neo4j.NewDriverWithContext(
 		dbInfo.URL,
-		neo4j.BasicAuth(dbInfo.Username, dbInfo.Password, ""))
+		tokenManager)
 	if err != nil {
 		slog.Error("Error creating driver: ", slog.Any("error", err))
 		os.Exit(1)
