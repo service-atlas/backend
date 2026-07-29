@@ -25,6 +25,9 @@ func (m *SecretProviderTokenManager) GetAuthToken(ctx context.Context) (neo4j.Au
 	return neo4j.BasicAuth(dbInfo.Username, dbInfo.Password, ""), nil
 }
 
-func (m *SecretProviderTokenManager) HandleSecurityException(_ context.Context, _ neo4j.AuthToken, _ *neo4j.Neo4jError) (bool, error) {
+func (m *SecretProviderTokenManager) HandleSecurityException(_ context.Context, _ neo4j.AuthToken, securityErr *neo4j.Neo4jError) (bool, error) {
+	if securityErr.Code == "Neo.ClientError.Security.Unauthorized" {
+		return true, nil
+	}
 	return false, nil
 }

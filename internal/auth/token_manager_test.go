@@ -15,11 +15,11 @@ type mockProvider struct {
 	err    error
 }
 
-func (m *mockProvider) GetDatabaseInfo(ctx context.Context) (secretsprovider.DatabaseInfo, error) {
+func (m *mockProvider) GetDatabaseInfo(_ context.Context) (secretsprovider.DatabaseInfo, error) {
 	return m.dbInfo, m.err
 }
 
-func (m *mockProvider) GetSecret(ctx context.Context, secretName string) (string, error) {
+func (m *mockProvider) GetSecret(_ context.Context, _ string) (string, error) {
 	return "", nil
 }
 
@@ -69,12 +69,25 @@ func TestSecretProviderTokenManager_HandleSecurityException(t *testing.T) {
 	tm := NewSecretProviderTokenManager(&mockProvider{})
 	ctx := t.Context()
 
-	// Current implementation always returns false, nil
-	refreshed, err := tm.HandleSecurityException(ctx, neo4j.AuthToken{}, &neo4j.Neo4jError{})
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-	if refreshed {
-		t.Error("expected refreshed to be false")
-	}
+	t.Run("refreshable security error", func(t *testing.T) {
+		securityErr := &neo4j.Neo4jError{Code: "Neo.ClientError.Security.Unauthorized"}
+		refreshed, err := tm.HandleSecurityException(ctx, neo4j.AuthToken{}, securityErr)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if !refreshed {
+			t.Error("expected refreshed to be true for Unauthorized error")
+		}
+	})
+
+	t.Run("non-refreshable security error", func(t *testing.T) {
+		securityErr := &neo4j.Neo4jError{Code: "Neo.ClientError.Security.Forbidden"}
+		refreshed, err := tm.HandleSecurityException(ctx, neo4j.AuthToken{}, securityErr)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if refreshed {
+			t.Error("expected refreshed to be false for Forbidden error")
+		}
+	})
 }
