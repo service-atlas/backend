@@ -9,6 +9,7 @@ import (
 	"service-atlas/repositories"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestUpdateServiceSuccess(t *testing.T) {
@@ -21,6 +22,7 @@ func TestUpdateServiceSuccess(t *testing.T) {
 					"name":        "ExistingService",
 					"type":        "Internal",
 					"description": "Existing service description",
+					"updated":     time.Now().UTC().String(),
 				})
 				return m
 			},
@@ -45,8 +47,21 @@ func TestUpdateServiceSuccess(t *testing.T) {
 	rw := httptest.NewRecorder()
 	handler.UpdateService(rw, req)
 
-	if rw.Code != http.StatusNoContent {
-		t.Errorf("Service UPDATE returned wrong status code: got %v want %v", rw.Code, http.StatusNoContent)
+	if rw.Code != http.StatusOK {
+		t.Errorf("Service UPDATE returned wrong status code: got %v want %v", rw.Code, http.StatusOK)
+	}
+
+	returnedService := &repositories.Service{}
+	err = json.Unmarshal(rw.Body.Bytes(), &returnedService)
+	if err != nil {
+		t.Errorf("Service UPDATE errored parsing return body with %s", err.Error())
+	}
+
+	if returnedService.Updated.IsZero() {
+		t.Errorf("Service UPDATE errored: Updated time is zero")
+	}
+	if time.Since(returnedService.Updated) > 5*time.Second {
+		t.Errorf("Service UPDATE errored: Updated time is not approximately now: %v", returnedService.Updated)
 	}
 }
 

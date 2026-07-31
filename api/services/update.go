@@ -7,6 +7,7 @@ import (
 	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
+	"time"
 )
 
 func (u *ServiceCallsHandler) UpdateService(rw http.ResponseWriter, r *http.Request) {
@@ -37,6 +38,12 @@ func (u *ServiceCallsHandler) UpdateService(rw http.ResponseWriter, r *http.Requ
 		customerrors.HandleError(rw, err)
 		return
 	}
-	rw.WriteHeader(http.StatusNoContent)
-
+	updateServiceRequest.Updated = time.Now().UTC()
+	rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	rw.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(rw).Encode(updateServiceRequest)
+	if err != nil {
+		logger.Error("Error encoding response:",
+			slog.String("error", err.Error()))
+	}
 }

@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestPOSTSuccess(t *testing.T) {
@@ -62,7 +63,14 @@ func TestPOSTSuccess(t *testing.T) {
 		t.Errorf("Service POST errored with ServiceType inconsistency %s", returnedService.ServiceType)
 	case returnedService.Url != "http://test.com":
 		t.Errorf("Service POST errored with Url inconsistency %s", returnedService.Url)
-
+	case returnedService.Created.IsZero():
+		t.Errorf("Service POST errored: Created time is zero")
+	case returnedService.Updated.IsZero():
+		t.Errorf("Service POST errored: Updated time is zero")
+	case time.Since(returnedService.Created) > 5*time.Second:
+		t.Errorf("Service POST errored: Created time is not approximately now: %v", returnedService.Created)
+	case time.Since(returnedService.Updated) > 5*time.Second:
+		t.Errorf("Service POST errored: Updated time is not approximately now: %v", returnedService.Updated)
 	}
 
 }
