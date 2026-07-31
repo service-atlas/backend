@@ -38,6 +38,8 @@ func (u *ServiceCallsHandler) CreateService(rw http.ResponseWriter, r *http.Requ
 	rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	rw.WriteHeader(http.StatusCreated)
 	createServiceRequest.Id = id
+	createServiceRequest.Created = time.Now().UTC()
+	createServiceRequest.Updated = createServiceRequest.Created
 	err = json.NewEncoder(rw).Encode(createServiceRequest)
 	if err != nil {
 		logger.Error("Error encoding response:",
