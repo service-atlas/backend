@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"strconv"
 )
 
 func (c CallsHandler) GetTeam(rw http.ResponseWriter, r *http.Request) {
-	id, ok := internal.GetGuidFromRequestPath("id", r)
+	id, ok := httphelpers.GetGuidFromRequestPath("id", r)
 	if !ok {
 		http.Error(rw, "Invalid team ID", http.StatusBadRequest)
 		return
