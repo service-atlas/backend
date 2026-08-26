@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
+
+	"github.com/service-atlas/go-common/httphelpers"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (c *CallsHandler) GetServiceChangeRisk(rw http.ResponseWriter, r *http.Request) {
-	serviceId, ok := internal.GetGuidFromRequestPath("id", r)
+	serviceId, ok := httphelpers.GetGuidFromRequestPath("id", r)
 	if !ok {
 		http.Error(rw, "Invalid service ID", http.StatusBadRequest)
 		return
@@ -22,7 +24,7 @@ func (c *CallsHandler) GetServiceChangeRisk(rw http.ResponseWriter, r *http.Requ
 	rw.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(rw).Encode(report)
 	if err != nil {
-		logger := internal.LoggerFromContext(r.Context())
+		logger := httplog.LoggerFromContext(r.Context())
 		logger.Debug("Error encoding change risk report json",
 			slog.String("error", err.Error()),
 		)
