@@ -2,8 +2,9 @@ package repositories
 
 import (
 	"errors"
-	"service-atlas/internal"
 	"time"
+
+	"github.com/service-atlas/go-common/httphelpers"
 )
 
 type Release struct {
@@ -14,7 +15,7 @@ type Release struct {
 }
 
 func (r *Release) Validate() error {
-	if _, ok := internal.IsValidGuid(r.ServiceId); !ok {
+	if _, ok := httphelpers.IsValidGuid(r.ServiceId); !ok {
 		return errors.New("invalid Service Id")
 	}
 	if r.ReleaseDate.IsZero() {

@@ -3,14 +3,11 @@ module service-atlas
 go 1.27.0
 
 require (
-	github.com/google/uuid v1.6.0
-	github.com/neo4j/neo4j-go-driver/v5 v5.28.4
-)
-
-require (
 	github.com/coreos/go-oidc/v3 v3.18.0
 	github.com/go-chi/chi/v5 v5.3.0
 	github.com/go-chi/cors v1.2.2
+	github.com/google/uuid v1.6.0
+	github.com/neo4j/neo4j-go-driver/v5 v5.28.4
 	github.com/service-atlas/secrets-provider v1.0.0
 	github.com/testcontainers/testcontainers-go/modules/neo4j v0.42.0
 	golang.org/x/sync v0.21.0
@@ -69,6 +66,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
+	github.com/service-atlas/go-common v1.0.1 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.5 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect

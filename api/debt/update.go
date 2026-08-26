@@ -7,10 +7,12 @@ import (
 	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"time"
+
+	"github.com/service-atlas/go-common/httphelpers"
 )
 
 func (c CallsHandler) UpdateDebtStatus(rw http.ResponseWriter, r *http.Request) {
-	id, ok := internal.GetGuidFromRequestPath("id", r)
+	id, ok := httphelpers.GetGuidFromRequestPath("id", r)
 	if !ok {
 		http.Error(rw, "debt id not valid", http.StatusBadRequest)
 		return

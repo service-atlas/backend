@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/json"
 	"errors"
-	"github.com/google/uuid"
 	"net/http"
 	"net/http/httptest"
 	"service-atlas/repositories"
@@ -11,6 +10,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"uuid"
 )
 
 // Tests for GetAllServices

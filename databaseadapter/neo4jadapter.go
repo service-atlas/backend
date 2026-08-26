@@ -3,9 +3,9 @@ package databaseadapter
 import (
 	"context"
 	"log/slog"
-	"service-atlas/internal"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func NewDriverManager(driver neo4j.DriverWithContext) DriverManager {
@@ -19,7 +19,7 @@ type Neo4jDriverAdapter struct {
 
 func (n Neo4jDriverAdapter) executeInSession(ctx context.Context, work func(tx neo4j.ManagedTransaction) (any, error), mode neo4j.AccessMode) (any, error) {
 	session := n.driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: mode})
-	logger := internal.LoggerFromContext(ctx)
+	logger := httplog.LoggerFromContext(ctx)
 	defer func() {
 		err := session.Close(context.Background())
 		if err != nil {
@@ -28,7 +28,7 @@ func (n Neo4jDriverAdapter) executeInSession(ctx context.Context, work func(tx n
 			)
 		}
 	}()
-	requestId := internal.GetRequestIdFromContext(ctx)
+	requestId := httplog.GetRequestIdFromContext(ctx)
 	if mode == neo4j.AccessModeWrite {
 		return session.ExecuteWrite(ctx, work,
 			neo4j.WithTxMetadata(map[string]any{
