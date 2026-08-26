@@ -3,13 +3,14 @@ package dependencies
 import (
 	"encoding/json"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
+
+	"github.com/service-atlas/go-common/httphelpers"
 )
 
 func (s *ServiceCallsHandler) CreateDependency(rw http.ResponseWriter, req *http.Request) {
-	id, ok := internal.GetGuidFromRequestPath("id", req)
+	id, ok := httphelpers.GetGuidFromRequestPath("id", req)
 	if !ok {
 		http.Error(rw, "path id not valid", http.StatusBadRequest)
 		return

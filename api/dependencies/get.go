@@ -7,10 +7,13 @@ import (
 	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
+
+	"github.com/service-atlas/go-common/httphelpers"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (s *ServiceCallsHandler) GetDependencies(rw http.ResponseWriter, req *http.Request) {
-	id, ok := internal.GetGuidFromRequestPath("id", req)
+	id, ok := httphelpers.GetGuidFromRequestPath("id", req)
 
 	if !ok {
 		http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -21,7 +24,7 @@ func (s *ServiceCallsHandler) GetDependencies(rw http.ResponseWriter, req *http.
 		http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	logger := internal.LoggerFromContext(req.Context())
+	logger := httplog.LoggerFromContext(req.Context())
 	logger.Debug("Getting dependencies",
 		slog.String("service_id", id),
 		slog.String("interaction_type", interaction_type),
@@ -40,7 +43,7 @@ func (s *ServiceCallsHandler) GetDependencies(rw http.ResponseWriter, req *http.
 	rw.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(rw).Encode(dep)
 	if err != nil {
-		logger := internal.LoggerFromContext(req.Context())
+		logger := httplog.LoggerFromContext(req.Context())
 		logger.Debug("Error encoding dependencies json",
 			slog.String("error", err.Error()),
 		)
@@ -48,7 +51,7 @@ func (s *ServiceCallsHandler) GetDependencies(rw http.ResponseWriter, req *http.
 }
 
 func (s *ServiceCallsHandler) GetDependents(rw http.ResponseWriter, req *http.Request) {
-	id, ok := internal.GetGuidFromRequestPath("id", req)
+	id, ok := httphelpers.GetGuidFromRequestPath("id", req)
 	if !ok {
 		http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
@@ -73,7 +76,7 @@ func (s *ServiceCallsHandler) GetDependents(rw http.ResponseWriter, req *http.Re
 
 	err = json.NewEncoder(rw).Encode(returnObj)
 	if err != nil {
-		logger := internal.LoggerFromContext(req.Context())
+		logger := httplog.LoggerFromContext(req.Context())
 		logger.Debug("Error encoding dependencies json",
 			slog.String("error", err.Error()),
 		)

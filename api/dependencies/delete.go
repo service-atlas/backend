@@ -2,17 +2,18 @@ package dependencies
 
 import (
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
+
+	"github.com/service-atlas/go-common/httphelpers"
 )
 
 func (s *ServiceCallsHandler) DeleteDependency(rw http.ResponseWriter, req *http.Request) {
-	id, ok := internal.GetGuidFromRequestPath("id", req)
+	id, ok := httphelpers.GetGuidFromRequestPath("id", req)
 	if !ok {
 		http.Error(rw, "path id not valid", http.StatusBadRequest)
 		return
 	}
-	dependsOnID, ok := internal.GetGuidFromRequestPath("id2", req)
+	dependsOnID, ok := httphelpers.GetGuidFromRequestPath("id2", req)
 	if !ok {
 		http.Error(rw, "path id2 not valid", http.StatusBadRequest)
 		return
