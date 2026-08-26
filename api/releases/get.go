@@ -3,13 +3,14 @@ package releases
 import (
 	"encoding/json"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"strconv"
+
+	"github.com/service-atlas/go-common/httphelpers"
 )
 
 func (s *ServiceCallsHandler) GetReleasesByServiceId(rw http.ResponseWriter, req *http.Request) {
-	serviceId, ok := internal.GetGuidFromRequestPath("id", req)
+	serviceId, ok := httphelpers.GetGuidFromRequestPath("id", req)
 	if !ok {
 		http.Error(rw, "Invalid service ID", http.StatusBadRequest)
 		return
@@ -39,12 +40,12 @@ func (s *ServiceCallsHandler) GetReleasesByServiceId(rw http.ResponseWriter, req
 }
 
 func (s *ServiceCallsHandler) GetReleasesInDateRange(rw http.ResponseWriter, req *http.Request) {
-	startDate, ok := internal.GetDateFromRequestPath("startDate", req)
+	startDate, ok := httphelpers.GetDateFromRequestPath("startDate", req)
 	if !ok {
 		http.Error(rw, "Invalid start date", http.StatusBadRequest)
 		return
 	}
-	endDate, ok := internal.GetDateFromRequestPath("endDate", req)
+	endDate, ok := httphelpers.GetDateFromRequestPath("endDate", req)
 	if !ok {
 		http.Error(rw, "Invalid end date", http.StatusBadRequest)
 		return

@@ -3,13 +3,14 @@ package releases
 import (
 	"encoding/json"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
+
+	"github.com/service-atlas/go-common/httphelpers"
 )
 
 func (s *ServiceCallsHandler) CreateRelease(rw http.ResponseWriter, req *http.Request) {
-	serviceId, ok := internal.GetGuidFromRequestPath("id", req)
+	serviceId, ok := httphelpers.GetGuidFromRequestPath("id", req)
 	if !ok {
 		http.Error(rw, "Invalid service ID", http.StatusBadRequest)
 		return
