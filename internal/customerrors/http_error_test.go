@@ -34,7 +34,7 @@ func TestHandleError_HTTPError(t *testing.T) {
 func TestHandleError_WrappedHTTPError(t *testing.T) {
 	rr := httptest.NewRecorder()
 	msg := "unauthorized access"
-	err := &HTTPError{Status: http.StatusUnauthorized, Msg: msg}
+	err := HTTPError{Status: http.StatusUnauthorized, Msg: msg}
 	wrappedErr := fmt.Errorf("error wrapping: %w", err)
 
 	HandleError(rr, wrappedErr)
