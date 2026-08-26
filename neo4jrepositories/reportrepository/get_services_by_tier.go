@@ -2,16 +2,16 @@ package reportrepository
 
 import (
 	"context"
-	"service-atlas/internal"
 	nRepo "service-atlas/neo4jrepositories"
 	"service-atlas/repositories"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (r Neo4jReportRepository) GetServicesByTier(ctx context.Context, tier int) ([]repositories.Service, error) {
 	services := make([]repositories.Service, 0)
-	logger := internal.LoggerFromContext(ctx)
+	logger := httplog.LoggerFromContext(ctx)
 	logger.Info("Getting services by tier", "tier", tier)
 	work := func(tx neo4j.ManagedTransaction) (any, error) {
 		result, err := tx.Run(ctx, `
