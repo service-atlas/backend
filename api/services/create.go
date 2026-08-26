@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/repositories"
 	"time"
+
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (u *ServiceCallsHandler) CreateService(rw http.ResponseWriter, r *http.Request) {
-	logger := internal.LoggerFromContext(r.Context())
+	logger := httplog.LoggerFromContext(r.Context())
 	createServiceRequest := &repositories.Service{}
 	err := json.NewDecoder(r.Body).Decode(createServiceRequest)
 	if err != nil {
