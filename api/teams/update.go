@@ -3,13 +3,14 @@ package teams
 import (
 	"encoding/json"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
+
+	"github.com/service-atlas/go-common/httphelpers"
 )
 
 func (c CallsHandler) UpdateTeam(rw http.ResponseWriter, r *http.Request) {
-	id, ok := internal.GetGuidFromRequestPath("id", r)
+	id, ok := httphelpers.GetGuidFromRequestPath("id", r)
 	if !ok {
 		http.Error(rw, "Invalid team ID", http.StatusBadRequest)
 		return

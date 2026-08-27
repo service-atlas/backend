@@ -5,14 +5,16 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"strconv"
 	"time"
+
+	"github.com/service-atlas/go-common/httphelpers"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (u *ServiceCallsHandler) GetAllServices(rw http.ResponseWriter, r *http.Request) {
-	logger := internal.LoggerFromContext(r.Context())
+	logger := httplog.LoggerFromContext(r.Context())
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
@@ -48,8 +50,8 @@ func (u *ServiceCallsHandler) GetAllServices(rw http.ResponseWriter, r *http.Req
 }
 
 func (u *ServiceCallsHandler) GetById(rw http.ResponseWriter, r *http.Request) {
-	logger := internal.LoggerFromContext(r.Context())
-	id, ok := internal.GetGuidFromRequestPath("id", r)
+	logger := httplog.LoggerFromContext(r.Context())
+	id, ok := httphelpers.GetGuidFromRequestPath("id", r)
 
 	if !ok {
 		http.Error(rw, "Service id is required", http.StatusBadRequest)
@@ -77,7 +79,7 @@ func (u *ServiceCallsHandler) GetById(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (u *ServiceCallsHandler) GetTeamsByServiceId(rw http.ResponseWriter, req *http.Request) {
-	serviceId, ok := internal.GetGuidFromRequestPath("id", req)
+	serviceId, ok := httphelpers.GetGuidFromRequestPath("id", req)
 	if !ok {
 		http.Error(rw, "Invalid service ID", http.StatusBadRequest)
 		return
@@ -92,7 +94,7 @@ func (u *ServiceCallsHandler) GetTeamsByServiceId(rw http.ResponseWriter, req *h
 	rw.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(rw).Encode(teams)
 	if err != nil {
-		internal.LoggerFromContext(req.Context()).Debug("Error encoding teams json",
+		httplog.LoggerFromContext(req.Context()).Debug("Error encoding teams json",
 			slog.String("error", err.Error()))
 	}
 }

@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"time"
+
+	"github.com/service-atlas/go-common/httphelpers"
 )
 
 func (c *CallsHandler) GetServiceRiskReport(rw http.ResponseWriter, req *http.Request) {
-	id, ok := internal.GetGuidFromRequestPath("id", req)
+	id, ok := httphelpers.GetGuidFromRequestPath("id", req)
 	if !ok {
 		http.Error(rw, "Invalid service ID", http.StatusBadRequest)
 		return

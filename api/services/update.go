@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 	"time"
+
+	"github.com/service-atlas/go-common/httphelpers"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (u *ServiceCallsHandler) UpdateService(rw http.ResponseWriter, r *http.Request) {
-	logger := internal.LoggerFromContext(r.Context())
+	logger := httplog.LoggerFromContext(r.Context())
 	updateServiceRequest := &repositories.Service{}
 	err := json.NewDecoder(r.Body).Decode(updateServiceRequest)
 	if err != nil {
@@ -20,7 +22,7 @@ func (u *ServiceCallsHandler) UpdateService(rw http.ResponseWriter, r *http.Requ
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if id, ok := internal.GetGuidFromRequestPath("id", r); !ok || updateServiceRequest.Id != id {
+	if id, ok := httphelpers.GetGuidFromRequestPath("id", r); !ok || updateServiceRequest.Id != id {
 		http.Error(rw, "Service Id is not valid", http.StatusBadRequest)
 		return
 	}

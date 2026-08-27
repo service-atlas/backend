@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
+
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (u *ServiceCallsHandler) Search(rw http.ResponseWriter, r *http.Request) {
@@ -14,7 +15,7 @@ func (u *ServiceCallsHandler) Search(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "query parameter is required", http.StatusBadRequest)
 		return
 	}
-	logger := internal.LoggerFromContext(r.Context())
+	logger := httplog.LoggerFromContext(r.Context())
 	services, err := u.Repository.Search(r.Context(), query)
 	if err != nil {
 		customerrors.HandleError(rw, err)

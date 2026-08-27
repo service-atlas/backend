@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
+
+	"github.com/service-atlas/go-common/httphelpers"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (c *CallsHandler) GetServicesByTeam(rw http.ResponseWriter, r *http.Request) {
-	teamId, ok := internal.GetGuidFromRequestPath("teamId", r)
-	logger := internal.LoggerFromContext(r.Context())
+	teamId, ok := httphelpers.GetGuidFromRequestPath("teamId", r)
+	logger := httplog.LoggerFromContext(r.Context())
 	if !ok {
 		http.Error(rw, "Invalid team ID", http.StatusBadRequest)
 		return

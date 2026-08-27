@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"service-atlas/repositories"
 	"time"
+
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (c *CallsHandler) GetServiceTypes(rw http.ResponseWriter, r *http.Request) {
 	ctxWithTimeout, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-	logger := internal.LoggerFromContext(r.Context())
+	logger := httplog.LoggerFromContext(r.Context())
 	defer cancel()
 	serviceTypes, err := c.repository.GetServiceTypes(ctxWithTimeout)
 	if err != nil {

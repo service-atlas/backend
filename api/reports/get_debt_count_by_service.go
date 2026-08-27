@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"time"
+
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (c *CallsHandler) GetServiceDebtReport(rw http.ResponseWriter, req *http.Request) {
@@ -22,7 +23,7 @@ func (c *CallsHandler) GetServiceDebtReport(rw http.ResponseWriter, req *http.Re
 	encoder := json.NewEncoder(rw)
 	err = encoder.Encode(report)
 	if err != nil {
-		logger := internal.LoggerFromContext(req.Context())
+		logger := httplog.LoggerFromContext(req.Context())
 		logger.Debug("Error encoding debt report json",
 			slog.String("error", err.Error()),
 		)

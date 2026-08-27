@@ -6,15 +6,17 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"strconv"
 	"time"
+
+	"github.com/service-atlas/go-common/httphelpers"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (c CallsHandler) GetDebtByServiceId(rw http.ResponseWriter, r *http.Request) {
-	logger := internal.LoggerFromContext(r.Context())
-	id, ok := internal.GetGuidFromRequestPath("id", r)
+	logger := httplog.LoggerFromContext(r.Context())
+	id, ok := httphelpers.GetGuidFromRequestPath("id", r)
 	if !ok {
 		http.Error(rw, "service id not valid", http.StatusBadRequest)
 		return

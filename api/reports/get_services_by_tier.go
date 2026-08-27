@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"strconv"
 	"time"
+
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (c *CallsHandler) GetServicesByTier(rw http.ResponseWriter, r *http.Request) {
-	logger := internal.LoggerFromContext(r.Context())
+	logger := httplog.LoggerFromContext(r.Context())
 	tierStr := r.URL.Query().Get("tier")
 	tier, err := strconv.Atoi(tierStr)
 	if err != nil {

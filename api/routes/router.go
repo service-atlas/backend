@@ -12,22 +12,21 @@ import (
 	"service-atlas/api/services"
 	"service-atlas/api/system"
 	"service-atlas/api/teams"
-	"service-atlas/internal"
 	"service-atlas/internal/auth"
-	"service-atlas/internal/config"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
+	"github.com/service-atlas/go-common/corsconfig"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 	slog.Debug("Setting up router")
 	router := chi.NewRouter()
 
-	router.Use(internal.RequestIDLogger)
-	router.Use(internal.StructuredLoggerFromContext())
+	router.Use(httplog.WebRequestLogger)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Compress(5))
 
@@ -104,7 +103,7 @@ func SetupRouter(driver neo4j.DriverWithContext) http.Handler {
 }
 
 func setupCORS(r chi.Router) {
-	corsConfig := config.GetCORSConfig()
+	corsConfig := corsconfig.GetCORSConfig()
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   corsConfig.AllowedOrigins,
 		AllowedMethods:   corsConfig.AllowedMethods,

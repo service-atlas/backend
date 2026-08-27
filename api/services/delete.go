@@ -4,14 +4,16 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
-	"service-atlas/internal"
 	"service-atlas/internal/customerrors"
 	"time"
+
+	"github.com/service-atlas/go-common/httphelpers"
+	"github.com/service-atlas/go-common/httplog"
 )
 
 func (u *ServiceCallsHandler) DeleteServiceById(rw http.ResponseWriter, r *http.Request) {
-	logger := internal.LoggerFromContext(r.Context())
-	id, ok := internal.GetGuidFromRequestPath("id", r)
+	logger := httplog.LoggerFromContext(r.Context())
+	id, ok := httphelpers.GetGuidFromRequestPath("id", r)
 	logger.Debug("Request received - DeleteServiceById - " + id)
 	if !ok {
 		http.Error(rw, "Invalid Request", http.StatusBadRequest)
