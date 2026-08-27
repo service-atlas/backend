@@ -190,6 +190,8 @@ github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0t
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
 github.com/service-atlas/go-common v1.0.1 h1:/FsWz7ytsfYsyeTFuoTgOSCy1XltrCFwaeGbAvh0JYU=
 github.com/service-atlas/go-common v1.0.1/go.mod h1:0qGi+nmvJp3ZOMxyuc389YbJX83xShtTsKvOCGoOHl8=
+github.com/service-atlas/go-common v1.1.0 h1:hVuuwPmoMPPRlQBR8K6HW0l7SINc1966D8x7FiQ6XeA=
+github.com/service-atlas/go-common v1.1.0/go.mod h1:0qGi+nmvJp3ZOMxyuc389YbJX83xShtTsKvOCGoOHl8=
 github.com/service-atlas/secrets-provider v1.0.0 h1:O0ui/5cR5+W6h5vJOc+pD5GA2BkqASzO1ul5y5yiwQs=
 github.com/service-atlas/secrets-provider v1.0.0/go.mod h1:BSugQI7NzTgQLqrF1NgSudSg6j+C9VLGpNAaabXsnmc=
 github.com/service-atlas/secrets-provider v1.0.1 h1:hYez2kSswKb/WThQecYGTNygZa9FObU2mxNrhHIgD5U=

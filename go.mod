@@ -8,7 +8,7 @@ require (
 	github.com/go-chi/cors v1.2.2
 	github.com/google/uuid v1.6.0
 	github.com/neo4j/neo4j-go-driver/v5 v5.28.4
-	github.com/service-atlas/go-common v1.0.1
+	github.com/service-atlas/go-common v1.1.0
 	github.com/service-atlas/secrets-provider v1.0.1
 	github.com/testcontainers/testcontainers-go/modules/neo4j v0.44.0
 	golang.org/x/sync v0.22.0
