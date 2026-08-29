@@ -41,6 +41,7 @@ jobs:
         with:
           client-id: ${{ secrets.COVERAGE_APP_ID }}
           private-key: ${{ secrets.COVERAGE_SECRET }}
+          permission-contents: write
 
       - uses: actions/checkout@v7
         name: Checkout

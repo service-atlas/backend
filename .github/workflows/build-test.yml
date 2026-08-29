@@ -43,6 +43,7 @@ jobs:
         name: Checkout
         with:
           ref: ${{ github.head_ref }}
+          persist-credentials: false
 
       - uses: actions/setup-go@v7
         with:
